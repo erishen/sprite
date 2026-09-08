@@ -9,7 +9,7 @@
 use std::process::Command;
 
 /// Keychain 服务名称（用于区分不同应用的密码项）
-const SERVICE_NAME: &str = "sprite-desktop-kit";
+const SERVICE_NAME: &str = "sprite";
 
 /// 保存密码到 Keychain（Tauri 命令）
 #[tauri::command]
