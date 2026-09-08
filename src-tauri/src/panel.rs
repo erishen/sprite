@@ -230,7 +230,7 @@ pub async fn open_settings(app: tauri::AppHandle) -> Result<String, String> {
         .decorations(false)
         .shadow(false)
         .resizable(false)
-        .background_color(tauri::window::Color::Rgba(0x1a, 0x1a, 0x2e, 0xff))
+        .background_color(tauri::window::Color { r: 0x1a, g: 0x1a, b: 0x2e, a: 0xff })
         .build()
         .map_err(|e| format!("创建设置窗口失败: {e}"))?;
     let _ = window.set_always_on_top(true);
