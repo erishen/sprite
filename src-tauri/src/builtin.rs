@@ -1,7 +1,7 @@
 //! 内置 LLM 客户端：直接调用 OpenAI 兼容 API（DeepSeek / OpenAI / 通义等），
 //! 作为三个后端都不可用时的 fallback。SSE 流式返回，复用 resolve.rs 的公共工具。
 
-use crate::resolve::{base_or, split_frame, spawn_task, StreamEvent};
+use crate::resolve::{base_or, spawn_task, split_frame, StreamEvent};
 use serde::{Deserialize, Serialize};
 use tauri::ipc::Channel;
 

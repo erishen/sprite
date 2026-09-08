@@ -23,8 +23,8 @@ mod hotkey;
 mod keychain;
 mod launcher;
 mod panel;
-mod resolve;
 mod resize;
+mod resolve;
 mod resolve_studio;
 mod settings;
 mod spring_harness;
@@ -96,43 +96,44 @@ pub fn run() {
                 // 尝试从设置文件读取热键配置
                 let app_handle = app.handle().clone();
                 match settings::settings_path(&app_handle) {
-                    Ok(path) if path.exists() => {
-                        match std::fs::read_to_string(&path) {
-                            Ok(content) => {
-                                match serde_json::from_str::<serde_json::Value>(&content) {
-                                    Ok(json) => {
-                                        json.get("hotkey")
-                                            .and_then(|v| v.as_str())
-                                            .map(|s| s.to_string())
-                                            .unwrap_or_else(|| hotkey::default_hotkey().to_string())
-                                    }
-                                    Err(_) => hotkey::default_hotkey().to_string(),
-                                }
-                            }
+                    Ok(path) if path.exists() => match std::fs::read_to_string(&path) {
+                        Ok(content) => match serde_json::from_str::<serde_json::Value>(&content) {
+                            Ok(json) => json
+                                .get("hotkey")
+                                .and_then(|v| v.as_str())
+                                .map(|s| s.to_string())
+                                .unwrap_or_else(|| hotkey::default_hotkey().to_string()),
                             Err(_) => hotkey::default_hotkey().to_string(),
-                        }
-                    }
+                        },
+                        Err(_) => hotkey::default_hotkey().to_string(),
+                    },
                     _ => hotkey::default_hotkey().to_string(),
                 }
             };
 
             match hotkey::parse_hotkey(&hotkey_str) {
                 Ok(toggle_shortcut) => {
-                    if let Err(e) = app.global_shortcut().on_shortcut(toggle_shortcut, |app, _shortcut, event| {
-                        if event.state() != ShortcutState::Pressed {
-                            return;
-                        }
-                        if let Some(win) = app.get_webview_window("main") {
-                            let visible = win.is_visible().unwrap_or(false);
-                            if visible {
-                                let _ = win.hide();
-                            } else {
-                                let _ = win.show();
-                                let _ = win.set_focus();
+                    if let Err(e) = app.global_shortcut().on_shortcut(
+                        toggle_shortcut,
+                        |app, _shortcut, event| {
+                            if event.state() != ShortcutState::Pressed {
+                                return;
                             }
-                        }
-                    }) {
-                        eprintln!("[sprite] 全局热键 {} 注册失败（可能被其他应用占用）: {e}", hotkey_str);
+                            if let Some(win) = app.get_webview_window("main") {
+                                let visible = win.is_visible().unwrap_or(false);
+                                if visible {
+                                    let _ = win.hide();
+                                } else {
+                                    let _ = win.show();
+                                    let _ = win.set_focus();
+                                }
+                            }
+                        },
+                    ) {
+                        eprintln!(
+                            "[sprite] 全局热键 {} 注册失败（可能被其他应用占用）: {e}",
+                            hotkey_str
+                        );
                         eprintln!("[sprite] 热键功能不可用，但仍可通过托盘图标唤起/隐藏窗口");
                     } else {
                         println!("[sprite] 全局热键已注册: {}", hotkey_str);
@@ -141,21 +142,25 @@ pub fn run() {
                 Err(e) => {
                     eprintln!("[sprite] 解析热键 {} 失败: {}", hotkey_str, e);
                     eprintln!("[sprite] 使用默认热键 Cmd+Option+D");
-                    let default_shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::ALT), Code::KeyD);
-                    let _ = app.global_shortcut().on_shortcut(default_shortcut, |app, _shortcut, event| {
-                        if event.state() != ShortcutState::Pressed {
-                            return;
-                        }
-                        if let Some(win) = app.get_webview_window("main") {
-                            let visible = win.is_visible().unwrap_or(false);
-                            if visible {
-                                let _ = win.hide();
-                            } else {
-                                let _ = win.show();
-                                let _ = win.set_focus();
+                    let default_shortcut =
+                        Shortcut::new(Some(Modifiers::SUPER | Modifiers::ALT), Code::KeyD);
+                    let _ = app.global_shortcut().on_shortcut(
+                        default_shortcut,
+                        |app, _shortcut, event| {
+                            if event.state() != ShortcutState::Pressed {
+                                return;
                             }
-                        }
-                    });
+                            if let Some(win) = app.get_webview_window("main") {
+                                let visible = win.is_visible().unwrap_or(false);
+                                if visible {
+                                    let _ = win.hide();
+                                } else {
+                                    let _ = win.show();
+                                    let _ = win.set_focus();
+                                }
+                            }
+                        },
+                    );
                 }
             }
 

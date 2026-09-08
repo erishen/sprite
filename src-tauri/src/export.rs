@@ -25,8 +25,7 @@ pub async fn save_export_file(file_name: String, content: String) -> Result<Stri
 
     // 确保下载目录存在
     if !downloads_dir.exists() {
-        fs::create_dir_all(&downloads_dir)
-            .map_err(|e| format!("创建下载目录失败: {e}"))?;
+        fs::create_dir_all(&downloads_dir).map_err(|e| format!("创建下载目录失败: {e}"))?;
     }
 
     // 构建完整文件路径

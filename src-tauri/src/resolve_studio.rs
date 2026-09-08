@@ -36,19 +36,39 @@ impl StreamEvent for ResolveEvent {
         match event.as_str() {
             "step" => Some(ResolveEvent::Step { step: json }),
             "delta" => Some(ResolveEvent::Delta {
-                text: json.get("text").and_then(|t| t.as_str()).unwrap_or("").to_string(),
+                text: json
+                    .get("text")
+                    .and_then(|t| t.as_str())
+                    .unwrap_or("")
+                    .to_string(),
             }),
             "reasoning" => Some(ResolveEvent::Reasoning {
-                text: json.get("text").and_then(|t| t.as_str()).unwrap_or("").to_string(),
+                text: json
+                    .get("text")
+                    .and_then(|t| t.as_str())
+                    .unwrap_or("")
+                    .to_string(),
             }),
-            "tool-call" => json.get("call").map(|c| ResolveEvent::ToolCall { call: c.clone() }),
-            "tool-result" => json.get("payload").map(|p| ResolveEvent::ToolResult { payload: p.clone() }),
-            "tool-progress" => json.get("payload").map(|p| ResolveEvent::ToolProgress { payload: p.clone() }),
-            "approval-request" => json.get("call").map(|c| ResolveEvent::ApprovalRequest { call: c.clone() }),
+            "tool-call" => json
+                .get("call")
+                .map(|c| ResolveEvent::ToolCall { call: c.clone() }),
+            "tool-result" => json
+                .get("payload")
+                .map(|p| ResolveEvent::ToolResult { payload: p.clone() }),
+            "tool-progress" => json
+                .get("payload")
+                .map(|p| ResolveEvent::ToolProgress { payload: p.clone() }),
+            "approval-request" => json
+                .get("call")
+                .map(|c| ResolveEvent::ApprovalRequest { call: c.clone() }),
             "usage" => Some(ResolveEvent::Usage { record: json }),
             "done" => Some(ResolveEvent::Done { answer: json }),
             "error" => Some(ResolveEvent::Error {
-                message: json.get("message").and_then(|m| m.as_str()).unwrap_or("未知错误").to_string(),
+                message: json
+                    .get("message")
+                    .and_then(|m| m.as_str())
+                    .unwrap_or("未知错误")
+                    .to_string(),
             }),
             _ => None,
         }
@@ -115,7 +135,11 @@ pub async fn resolve_chat_abort(win: String) {
 
 /// 对 pending 的工具调用做出审批决定（HUD 内的批准/拒绝按钮）。
 #[tauri::command]
-pub async fn resolve_approve(base: String, call_id: String, decision: String) -> Result<(), String> {
+pub async fn resolve_approve(
+    base: String,
+    call_id: String,
+    decision: String,
+) -> Result<(), String> {
     if decision != "approve" && decision != "reject" {
         return Err("decision 必须是 approve 或 reject".into());
     }

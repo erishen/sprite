@@ -11,9 +11,15 @@ use crate::resolve::{abort_task, base_or, register_task, StreamEvent, DEFAULT_HA
 #[derive(Clone, Serialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum HarnessEvent {
-    Tool { call: serde_json::Value },
-    ToolResult { call: serde_json::Value },
-    Text { text: String },
+    Tool {
+        call: serde_json::Value,
+    },
+    ToolResult {
+        call: serde_json::Value,
+    },
+    Text {
+        text: String,
+    },
     /// 工具调用等待人工审批（前端渲染批准/拒绝按钮）。
     ApprovalRequest {
         #[serde(rename = "threadId")]
@@ -24,7 +30,9 @@ pub enum HarnessEvent {
         tool_name: String,
     },
     Done,
-    Error { message: String },
+    Error {
+        message: String,
+    },
 }
 
 impl StreamEvent for HarnessEvent {
@@ -168,12 +176,18 @@ pub async fn harness_chat(
                 let kind = item.get("kind").and_then(|k| k.as_str()).unwrap_or("");
                 match kind {
                     "tool_call" => {
-                        if on_event.send(HarnessEvent::Tool { call: item.clone() }).is_err() {
+                        if on_event
+                            .send(HarnessEvent::Tool { call: item.clone() })
+                            .is_err()
+                        {
                             return;
                         }
                     }
                     "tool_result" => {
-                        if on_event.send(HarnessEvent::ToolResult { call: item.clone() }).is_err() {
+                        if on_event
+                            .send(HarnessEvent::ToolResult { call: item.clone() })
+                            .is_err()
+                        {
                             return;
                         }
                     }
@@ -184,7 +198,9 @@ pub async fn harness_chat(
         if let Some(reply) = json.get("reply").and_then(|r| r.as_str()) {
             if !reply.trim().is_empty() {
                 if on_event
-                    .send(HarnessEvent::Text { text: reply.to_string() })
+                    .send(HarnessEvent::Text {
+                        text: reply.to_string(),
+                    })
                     .is_err()
                 {
                     return;
@@ -256,7 +272,11 @@ pub async fn fetch_examples(
         url.push_str(&format!("?mode={m}"));
     }
     if llm.unwrap_or(false) {
-        url.push_str(if url.contains('?') { "&llm=true" } else { "?llm=true" });
+        url.push_str(if url.contains('?') {
+            "&llm=true"
+        } else {
+            "?llm=true"
+        });
     }
     let mut req = reqwest::Client::new()
         .get(url)
@@ -264,10 +284,7 @@ pub async fn fetch_examples(
     if !token.trim().is_empty() {
         req = req.bearer_auth(token.trim());
     }
-    let resp = req
-        .send()
-        .await
-        .map_err(|e| format!("请求示例失败: {e}"))?;
+    let resp = req.send().await.map_err(|e| format!("请求示例失败: {e}"))?;
     let status = resp.status();
     let text = resp.text().await.unwrap_or_default();
     if !status.is_success() {
@@ -317,7 +334,11 @@ pub async fn harness_approve(
         return Err("thread_id 不能为空".into());
     }
     let base = base_or(&base, DEFAULT_HARNESS_BASE);
-    let action = if decision == "approve" { "approve" } else { "deny" };
+    let action = if decision == "approve" {
+        "approve"
+    } else {
+        "deny"
+    };
     let mut req = reqwest::Client::new()
         .post(format!("{base}/api/chat/approve"))
         .json(&serde_json::json!({
@@ -375,7 +396,10 @@ pub async fn harness_approve(
             let kind = item.get("kind").and_then(|k| k.as_str()).unwrap_or("");
             match kind {
                 "tool_call" => {
-                    if on_event.send(HarnessEvent::Tool { call: item.clone() }).is_err() {
+                    if on_event
+                        .send(HarnessEvent::Tool { call: item.clone() })
+                        .is_err()
+                    {
                         return Ok(());
                     }
                 }

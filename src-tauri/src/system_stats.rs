@@ -75,15 +75,13 @@ pub fn get_local_ip() -> String {
 
     // 获取本地 IP
     let ip = match std::net::UdpSocket::bind("0.0.0.0:0") {
-        Ok(socket) => {
-            match socket.connect("8.8.8.8:80") {
-                Ok(_) => match socket.local_addr() {
-                    Ok(addr) => addr.ip().to_string(),
-                    Err(_) => String::new(),
-                },
+        Ok(socket) => match socket.connect("8.8.8.8:80") {
+            Ok(_) => match socket.local_addr() {
+                Ok(addr) => addr.ip().to_string(),
                 Err(_) => String::new(),
-            }
-        }
+            },
+            Err(_) => String::new(),
+        },
         Err(_) => String::new(),
     };
 
@@ -143,10 +141,7 @@ fn get_disk_usage_for_path(path: &str) -> (f64, f64, f64) {
     // df -H <path> 输出格式：
     // Filesystem       Size   Used  Avail Capacity iused ifree %iused  Mounted on
     // /dev/disk3s5     494G   461G    34G    94% 4293452 314569   93%   /System/Volumes/Data
-    let output = Command::new("df")
-        .arg("-H")
-        .arg(path)
-        .output();
+    let output = Command::new("df").arg("-H").arg(path).output();
 
     match output {
         Ok(output) if output.status.success() => {
@@ -159,15 +154,18 @@ fn get_disk_usage_for_path(path: &str) -> (f64, f64, f64) {
                     // parts[1] = Size, parts[2] = Used, parts[3] = Avail
                     // 格式如 "494G", "461G", "34G"
                     let parse_size = |s: &str| -> f64 {
-                        let num: String = s.chars().filter(|c| c.is_ascii_digit() || *c == '.').collect();
+                        let num: String = s
+                            .chars()
+                            .filter(|c| c.is_ascii_digit() || *c == '.')
+                            .collect();
                         let unit = s.chars().last().unwrap_or(' ');
                         let value: f64 = num.parse().unwrap_or(0.0);
                         match unit {
                             'K' | 'k' => value / 1000.0 / 1000.0, // KB -> GB
-                            'M' | 'm' => value / 1000.0,           // MB -> GB
-                            'G' | 'g' => value,                      // GB
-                            'T' | 't' => value * 1000.0,            // TB -> GB
-                            _ => value / 1000.0 / 1000.0,           // 假设是 KB
+                            'M' | 'm' => value / 1000.0,          // MB -> GB
+                            'G' | 'g' => value,                   // GB
+                            'T' | 't' => value * 1000.0,          // TB -> GB
+                            _ => value / 1000.0 / 1000.0,         // 假设是 KB
                         }
                     };
 

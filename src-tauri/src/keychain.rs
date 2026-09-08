@@ -122,13 +122,7 @@ pub fn get_password(account: &str) -> Result<Option<String>, String> {
 pub fn delete_password(account: &str) -> Result<(), String> {
     // 使用 security delete-generic-password 命令删除密码
     let output = Command::new("security")
-        .args([
-            "delete-generic-password",
-            "-s",
-            SERVICE_NAME,
-            "-a",
-            account,
-        ])
+        .args(["delete-generic-password", "-s", SERVICE_NAME, "-a", account])
         .output()
         .map_err(|e| format!("执行 security 命令失败: {e}"))?;
 

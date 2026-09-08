@@ -4,7 +4,9 @@ use serde::Serialize;
 use std::time::Duration;
 use tauri::ipc::Channel;
 
-use crate::resolve::{base_or, spawn_task, split_frame, urlencode, StreamEvent, DEFAULT_SPRING_BASE};
+use crate::resolve::{
+    base_or, spawn_task, split_frame, urlencode, StreamEvent, DEFAULT_SPRING_BASE,
+};
 
 /// 转发给前端的 spring-harness SSE 事件（ReAct Agent 流式协议）。
 #[derive(Clone, Serialize)]
@@ -37,7 +39,9 @@ impl StreamEvent for SpringEvent {
                 if text.is_empty() {
                     None
                 } else {
-                    Some(SpringEvent::Thinking { text: text.to_string() })
+                    Some(SpringEvent::Thinking {
+                        text: text.to_string(),
+                    })
                 }
             }
             "tool" => {
@@ -55,7 +59,9 @@ impl StreamEvent for SpringEvent {
                 if content.is_empty() {
                     None
                 } else {
-                    Some(SpringEvent::Delta { text: content.to_string() })
+                    Some(SpringEvent::Delta {
+                        text: content.to_string(),
+                    })
                 }
             }
             "done" => Some(SpringEvent::Done),

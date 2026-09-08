@@ -99,7 +99,8 @@ pub async fn load_settings(app: AppHandle) -> Result<Settings, String> {
         return Ok(Settings::default());
     }
     let content = fs::read_to_string(&path).map_err(|e| format!("读取配置文件失败: {e}"))?;
-    let settings: Settings = serde_json::from_str(&content).map_err(|e| format!("解析配置文件失败: {e}"))?;
+    let settings: Settings =
+        serde_json::from_str(&content).map_err(|e| format!("解析配置文件失败: {e}"))?;
     Ok(settings)
 }
 
@@ -107,7 +108,8 @@ pub async fn load_settings(app: AppHandle) -> Result<Settings, String> {
 #[tauri::command]
 pub async fn save_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
     let path = settings_path(&app)?;
-    let json = serde_json::to_string_pretty(&settings).map_err(|e| format!("序列化配置失败: {e}"))?;
+    let json =
+        serde_json::to_string_pretty(&settings).map_err(|e| format!("序列化配置失败: {e}"))?;
     fs::write(&path, json).map_err(|e| format!("写入配置文件失败: {e}"))?;
     // 保存成功后发送全局事件，通知所有窗口重新加载设置
     let _ = app.emit("settings-updated", ());

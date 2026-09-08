@@ -27,7 +27,9 @@ fn get_main_monitor(app: &tauri::AppHandle) -> Option<tauri::Monitor> {
 
 /// 获取母窗口的位置和大小
 /// 如果母窗口不存在或获取失败，返回母窗口所在显示器的默认位置
-fn get_main_window_position(app: &tauri::AppHandle) -> (tauri::LogicalPosition<f64>, tauri::LogicalSize<f64>) {
+fn get_main_window_position(
+    app: &tauri::AppHandle,
+) -> (tauri::LogicalPosition<f64>, tauri::LogicalSize<f64>) {
     if let Some(main) = app.get_webview_window("main") {
         let scale = main
             .current_monitor()
@@ -36,7 +38,10 @@ fn get_main_window_position(app: &tauri::AppHandle) -> (tauri::LogicalPosition<f
             .map(|m| m.scale_factor())
             .unwrap_or(1.0);
         if let (Ok(mpos), Ok(msize)) = (main.outer_position(), main.outer_size()) {
-            return (mpos.to_logical::<f64>(scale), msize.to_logical::<f64>(scale));
+            return (
+                mpos.to_logical::<f64>(scale),
+                msize.to_logical::<f64>(scale),
+            );
         }
     }
     // 母窗口不存在或获取失败，使用母窗口所在显示器的默认位置（右上角）
@@ -129,7 +134,7 @@ pub async fn open_panel(app: tauri::AppHandle, kind: String) -> Result<String, S
         let n_cols = kind_index as f64 + 1.0;
         let needed = n_cols * w + (n_cols - 1.0) * 8.0;
         let avail = mp.x - mon_x; // 相对于显示器左边界的可用空间
-        // 重叠量：最大 380px（子窗口宽度 440，只留 60px 可见），确保多个子窗口都能在屏幕内
+                                  // 重叠量：最大 380px（子窗口宽度 440，只留 60px 可见），确保多个子窗口都能在屏幕内
         let ov = if n_cols > 1.0 {
             ((needed - avail) / (n_cols - 1.0)).max(0.0).min(380.0)
         } else {
@@ -139,22 +144,23 @@ pub async fn open_panel(app: tauri::AppHandle, kind: String) -> Result<String, S
         // 确保子窗口在显示器范围内（不小于显示器左边界）
         let x_raw = mp.x - w - 8.0 - kind_index as f64 * (w - ov) + 50.0;
         let x = x_raw.max(mon_x + 8.0); // 至少距离显示器左边界 8px
-        // y 坐标也不要使用 .max(0.0)，否则母窗口在副屏（y坐标为负）时子窗口会跑到主屏
+                                        // y 坐标也不要使用 .max(0.0)，否则母窗口在副屏（y坐标为负）时子窗口会跑到主屏
         let y = mp.y + offset;
         (x, y)
     };
 
-    let window = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::App("index.html".into()))
-        .title(&label)
-        .inner_size(w, h)
-        .position(x, y)
-        .transparent(true)
-        .always_on_top(true)
-        .decorations(false)
-        .shadow(false)
-        .resizable(false)
-        .build()
-        .map_err(|e| format!("创建窗口失败: {e}"))?;
+    let window =
+        tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::App("index.html".into()))
+            .title(&label)
+            .inner_size(w, h)
+            .position(x, y)
+            .transparent(true)
+            .always_on_top(true)
+            .decorations(false)
+            .shadow(false)
+            .resizable(false)
+            .build()
+            .map_err(|e| format!("创建窗口失败: {e}"))?;
 
     // 立即设置置顶、可见和焦点
     let _ = window.set_always_on_top(true);
@@ -182,8 +188,7 @@ pub async fn open_panel(app: tauri::AppHandle, kind: String) -> Result<String, S
 #[tauri::command]
 pub async fn close_panel(app: tauri::AppHandle, label: String) -> Result<(), String> {
     if let Some(win) = app.get_webview_window(&label) {
-        win.close()
-            .map_err(|e| format!("关闭窗口失败: {e}"))?;
+        win.close().map_err(|e| format!("关闭窗口失败: {e}"))?;
         Ok(())
     } else {
         Err(format!("未找到窗口: {label}"))
@@ -195,7 +200,10 @@ pub async fn close_panel(app: tauri::AppHandle, label: String) -> Result<(), Str
 pub async fn open_settings(app: tauri::AppHandle) -> Result<String, String> {
     // 已存在设置窗口时聚焦它，不重复打开
     let windows = app.webview_windows();
-    if let Some(existing) = windows.values().find(|w| w.label().starts_with("settings-")) {
+    if let Some(existing) = windows
+        .values()
+        .find(|w| w.label().starts_with("settings-"))
+    {
         let _ = existing.set_always_on_top(true);
         let _ = existing.set_focus();
         return Ok(existing.label().to_string());
@@ -221,18 +229,19 @@ pub async fn open_settings(app: tauri::AppHandle) -> Result<String, String> {
         (0.0, 0.0)
     };
 
-    let window = tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::App("index.html".into()))
-        .title("设置")
-        .inner_size(w, h)
-        .position(x, y)
-        .transparent(false)
-        .always_on_top(true)
-        .decorations(false)
-        .shadow(false)
-        .resizable(false)
-        .background_color(tauri::window::Color(0x1a, 0x1a, 0x2e, 0xff))
-        .build()
-        .map_err(|e| format!("创建设置窗口失败: {e}"))?;
+    let window =
+        tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::App("index.html".into()))
+            .title("设置")
+            .inner_size(w, h)
+            .position(x, y)
+            .transparent(false)
+            .always_on_top(true)
+            .decorations(false)
+            .shadow(false)
+            .resizable(false)
+            .background_color(tauri::window::Color(0x1a, 0x1a, 0x2e, 0xff))
+            .build()
+            .map_err(|e| format!("创建设置窗口失败: {e}"))?;
     let _ = window.set_always_on_top(true);
     let _ = window.set_focus();
     Ok(label)

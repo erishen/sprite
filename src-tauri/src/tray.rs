@@ -26,28 +26,44 @@ pub fn build_tray_menu(
 
     // 后端状态区
     items.push(Box::new(MenuItem::with_id(
-        app, "st-head", "后端状态", false, None::<&str>,
+        app,
+        "st-head",
+        "后端状态",
+        false,
+        None::<&str>,
     )?));
     let resolve_text = match resolve {
         Some(tools) => format!("● Resolve Studio · 在线 · {tools} 工具"),
         None => "○ Resolve Studio · 离线".into(),
     };
     items.push(Box::new(MenuItem::with_id(
-        app, "st-resolve", &resolve_text, false, None::<&str>,
+        app,
+        "st-resolve",
+        &resolve_text,
+        false,
+        None::<&str>,
     )?));
     let spring_text = match spring {
         Some(n) => format!("● Spring Harness · 在线 · {n} 模型"),
         None => "○ Spring Harness · 离线".into(),
     };
     items.push(Box::new(MenuItem::with_id(
-        app, "st-spring", &spring_text, false, None::<&str>,
+        app,
+        "st-spring",
+        &spring_text,
+        false,
+        None::<&str>,
     )?));
     let harness_text = match harness_model {
         Some(model) => format!("● Resolve Harness · 在线 · {model}"),
         None => "○ Resolve Harness · 离线".into(),
     };
     items.push(Box::new(MenuItem::with_id(
-        app, "st-harness", &harness_text, false, None::<&str>,
+        app,
+        "st-harness",
+        &harness_text,
+        false,
+        None::<&str>,
     )?));
 
     items.push(Box::new(PredefinedMenuItem::separator(app)?));
@@ -55,10 +71,22 @@ pub fn build_tray_menu(
     // 系统资源状态区
     if let Some((cpu, mem_used, mem_total, disk_used, disk_total)) = system_stats {
         items.push(Box::new(MenuItem::with_id(
-            app, "sys-head", "系统资源", false, None::<&str>,
+            app,
+            "sys-head",
+            "系统资源",
+            false,
+            None::<&str>,
         )?));
-        let mem_percent = if mem_total > 0.0 { (mem_used / mem_total * 100.0) as u32 } else { 0 };
-        let disk_percent = if disk_total > 0.0 { (disk_used / disk_total * 100.0) as u32 } else { 0 };
+        let mem_percent = if mem_total > 0.0 {
+            (mem_used / mem_total * 100.0) as u32
+        } else {
+            0
+        };
+        let disk_percent = if disk_total > 0.0 {
+            (disk_used / disk_total * 100.0) as u32
+        } else {
+            0
+        };
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-cpu",
@@ -69,14 +97,20 @@ pub fn build_tray_menu(
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-mem",
-            &format!("内存: {:.1}/{:.1} GB ({}%)", mem_used, mem_total, mem_percent),
+            &format!(
+                "内存: {:.1}/{:.1} GB ({}%)",
+                mem_used, mem_total, mem_percent
+            ),
             false,
             None::<&str>,
         )?));
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-disk",
-            &format!("磁盘: {:.0}/{:.0} GB ({}%)", disk_used, disk_total, disk_percent),
+            &format!(
+                "磁盘: {:.0}/{:.0} GB ({}%)",
+                disk_used, disk_total, disk_percent
+            ),
             false,
             None::<&str>,
         )?));
@@ -130,10 +164,7 @@ pub fn build_tray_menu(
     items.push(Box::new(PredefinedMenuItem::separator(app)?));
 
     // 窗口列表（不含 main：Show HUD 已覆盖）
-    let panels: Vec<&String> = windows
-        .iter()
-        .filter(|l| l.contains('-'))
-        .collect();
+    let panels: Vec<&String> = windows.iter().filter(|l| l.contains('-')).collect();
     items.push(Box::new(MenuItem::with_id(
         app,
         "win-head",
@@ -164,10 +195,18 @@ pub fn build_tray_menu(
     items.push(Box::new(PredefinedMenuItem::separator(app)?));
 
     items.push(Box::new(MenuItem::with_id(
-        app, "show", "Show HUD", true, None::<&str>,
+        app,
+        "show",
+        "Show HUD",
+        true,
+        None::<&str>,
     )?));
     items.push(Box::new(MenuItem::with_id(
-        app, "quit", "Quit", true, None::<&str>,
+        app,
+        "quit",
+        "Quit",
+        true,
+        None::<&str>,
     )?));
 
     let refs: Vec<&dyn IsMenuItem<Wry>> = items.iter().map(|b| b.as_ref()).collect();
@@ -197,7 +236,14 @@ pub fn start_tray_poll(app: &tauri::AppHandle) {
                 sys.disk_total_gb,
             ));
             let windows: Vec<String> = app.webview_windows().keys().cloned().collect();
-            if let Ok(menu) = build_tray_menu(&app, resolve_det, spring_det, harness_det, &windows, system_det) {
+            if let Ok(menu) = build_tray_menu(
+                &app,
+                resolve_det,
+                spring_det,
+                harness_det,
+                &windows,
+                system_det,
+            ) {
                 if let Some(tray) = app.tray_by_id("hud-tray") {
                     let _ = tray.set_menu(Some(menu));
                 }
