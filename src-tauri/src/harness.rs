@@ -186,10 +186,10 @@ pub async fn harness_chat(
                     "tool_result"
                         if on_event
                             .send(HarnessEvent::ToolResult { call: item.clone() })
-                            .is_err()
-                        => {
-                            return;
-                        }
+                            .is_err() =>
+                    {
+                        return;
+                    }
                     _ => {}
                 }
             }
@@ -201,9 +201,9 @@ pub async fn harness_chat(
                         text: reply.to_string(),
                     })
                     .is_err()
-                {
-                    return;
-                }
+            {
+                return;
+            }
         }
         let _ = on_event.send(HarnessEvent::Done);
     });
@@ -404,10 +404,10 @@ pub async fn harness_approve(
                 "tool_result"
                     if on_event
                         .send(HarnessEvent::ToolResult { call: item.clone() })
-                        .is_err()
-                    => {
-                        return Ok(());
-                    }
+                        .is_err() =>
+                {
+                    return Ok(());
+                }
                 _ => {}
             }
         }
@@ -421,9 +421,9 @@ pub async fn harness_approve(
                     text: reply.to_string(),
                 })
                 .is_err()
-            {
-                return Ok(());
-            }
+        {
+            return Ok(());
+        }
     }
 
     // 4. 发送 Done 事件
