@@ -1,6 +1,6 @@
 # Sprite 文档
 
-> Sprite（原 desktop-kit）是一个基于 Tauri v2 + React 的桌面悬浮助手应用。
+> Sprite 是一个基于 Tauri v2 + React 的桌面悬浮助手应用。
 
 ## 文档目录
 

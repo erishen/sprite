@@ -1,6 +1,6 @@
 # Sprite 架构文档
 
-> Sprite（原 desktop-kit）是一个基于 Tauri v2 + React 的桌面悬浮助手应用，提供多后端 LLM 聊天、系统监控、番茄时钟、剪贴板历史、密码箱等功能。
+> Sprite 是一个基于 Tauri v2 + React 的桌面悬浮助手应用，提供多后端 LLM 聊天、系统监控、番茄时钟、剪贴板历史、密码箱等功能。
 
 ---
 
