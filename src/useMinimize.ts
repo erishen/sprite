@@ -53,20 +53,21 @@ export function useMinimize(
       // x 坐标：根据 position 调整（相对于窗口当前位置）
       const miniW = Math.round(miniWidth * scale); // 物理像素
       const miniH = Math.round(MIN_H * scale); // 物理像素
+      const offsetPx = Math.round(offset * scale); // 偏移量转换成物理像素
       let mx: number;
       switch (position) {
         case "left":
-          // 左侧：保持窗口当前的 x 坐标
-          mx = pos.x;
+          // 左侧：保持窗口当前的 x 坐标，向右偏移 offset
+          mx = pos.x + offsetPx;
           break;
         case "center":
-          // 中央：保持窗口当前的 x 坐标
-          mx = pos.x;
+          // 中央：居中对齐（相对于原窗口）
+          mx = pos.x + Math.round((size.width - miniW) / 2);
           break;
         case "right":
         default:
-          // 右侧：保持窗口当前的 x 坐标
-          mx = pos.x;
+          // 右侧：靠右对齐（相对于原窗口），再向左偏移 offset
+          mx = pos.x + (size.width - miniW) - offsetPx;
           break;
       }
       // y 坐标：直接使用窗口当前的 y 坐标
