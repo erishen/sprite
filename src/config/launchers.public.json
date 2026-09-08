@@ -1,0 +1,9 @@
+[
+  { "kind": "url", "label": "GitHub", "url": "https://github.com" },
+  { "kind": "url", "label": "LinkedIn", "url": "https://www.linkedin.com/in/erishen/" },
+  { "kind": "url", "label": "X", "url": "https://x.com/erishen" },
+  { "kind": "url", "label": "erishen.cn", "url": "https://erishen.cn" },
+  { "kind": "app", "label": "终端", "app": "Terminal" },
+  { "kind": "app", "label": "VS Code", "app": "Visual Studio Code" },
+  { "kind": "app", "label": "Finder", "app": "Finder" }
+]

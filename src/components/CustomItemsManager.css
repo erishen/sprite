@@ -1,0 +1,242 @@
+/* 自定义配置项管理组件样式 */
+
+.custom-items-section {
+  margin-bottom: 20px;
+}
+
+.custom-items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.custom-items-header h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #e6e9f5;
+}
+
+.custom-items-add-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #818cf8;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.custom-items-add-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.custom-items-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 添加/编辑表单 */
+.custom-items-form {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.custom-items-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 配置项列表 */
+.custom-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-items-empty {
+  text-align: center;
+  padding: 20px;
+  color: #7e8499;
+  font-size: 12px;
+}
+
+/* 单个配置项 */
+.custom-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  transition: background 0.15s;
+}
+
+.custom-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 按钮文案（点击复制） */
+.custom-item-label {
+  flex: none;
+  min-width: 80px;
+  max-width: 120px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s;
+}
+
+.custom-item-label:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.custom-item-label.copied {
+  background: rgba(82, 196, 26, 0.15);
+  border-color: rgba(82, 196, 26, 0.4);
+  color: #52c41a;
+}
+
+/* 内容 */
+.custom-item-content {
+  flex: 1;
+  font-size: 12px;
+  font-family: "SF Mono", "Monaco", "Consolas", monospace;
+  min-width: 0;
+}
+
+.custom-item-content-masked {
+  color: #7e8499;
+  letter-spacing: 2px;
+}
+
+.custom-item-content-plain {
+  color: #c8cde0;
+  word-break: break-all;
+}
+
+/* 操作按钮 */
+.custom-item-actions {
+  flex: none;
+  display: flex;
+  gap: 4px;
+}
+
+.custom-item-action-btn {
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.15s;
+}
+
+.custom-item-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.custom-item-action-btn.delete:hover {
+  background: rgba(234, 102, 104, 0.15);
+}
+
+/* 主密码验证界面 */
+.master-password-lock {
+  text-align: center;
+  padding: 30px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.master-password-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.master-password-lock h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e6e9f5;
+}
+
+.master-password-lock p {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #7e8499;
+}
+
+.master-password-input {
+  width: 100%;
+  max-width: 240px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e6e9f5;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.master-password-input:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.master-password-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.master-password-error {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: #ea6668;
+}
+
+.master-password-unlock-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.master-password-unlock-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.master-password-unlock-btn:active {
+  transform: translateY(0);
+}

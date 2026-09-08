@@ -1,0 +1,107 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos
+            artifact_name: sprite_macos
+          - os: ubuntu-22.04
+            platform: linux
+            artifact_name: sprite_linux
+          - os: windows-latest
+            platform: windows
+            artifact_name: sprite_windows
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install dependencies (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: 'sprite ${{ github.ref_name }}'
+          releaseBody: |
+            ## sprite ${{ github.ref_name }}
+
+            ### 下载
+
+            | 平台 | 文件 |
+            |------|------|
+            | macOS | `.dmg` |
+            | Linux | `.AppImage` / `.deb` |
+            | Windows | `.exe` / `.msi` |
+
+            ### 校验和
+
+            请下载后验证 SHA256 校验和。
+
+            ### macOS 打开未公证应用
+
+            右键点击应用 → 打开 → 再次点击打开。
+
+            或在终端执行：
+            ```bash
+            xattr -cr /Applications/sprite.app
+            ```
+          releaseDraft: false
+          prerelease: false
+
+      - name: Generate SHA256 checksums
+        if: always()
+        run: |
+          cd src-tauri/target/release/bundle 2>/dev/null || cd target/release/bundle 2>/dev/null || true
+          find . -type f \( -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.exe" -o -name "*.msi" \) -exec shasum -a 256 {} \; > checksums.txt 2>/dev/null || true
+          cat checksums.txt 2>/dev/null || echo "No bundle files found"
+
+      - name: Upload checksums
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-checksums
+          path: |
+            **/checksums.txt
+          if-no-files-found: ignore

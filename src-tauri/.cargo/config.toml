@@ -1,0 +1,9 @@
+# Sprite 配置：
+# 1. 启用 sccache（编译缓存，提高重复编译速度）
+# 2. 启用增量编译（提高编译速度）
+# 全局配置 ~/.cargo/config.toml 中 rustc-wrapper = "sccache"
+[build]
+rustc-wrapper = "sccache"
+
+[profile.dev]
+incremental = true

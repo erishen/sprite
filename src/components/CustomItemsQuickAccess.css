@@ -1,0 +1,149 @@
+/* 首页自定义配置快速访问组件样式 */
+
+.custom-items-quick {
+  margin-top: 10px;
+  /* 和上面的 .hud-links 保持一致的左右边距（16px），确保对齐 */
+  padding: 0 16px;
+}
+
+/* 密码箱按钮网格：增加间距 */
+.custom-items-quick .link-grid {
+  gap: 8px;
+}
+
+/* 密码箱按钮：自由填充可用空间，一行空着就占满，两个就平分 */
+.custom-item-btn {
+  flex: 1 1 calc(33.333% - 6px);
+  min-width: 0;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  /* 禁止文字选中，避免双击选中 */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.custom-item-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #c7d2fe;
+}
+
+/* 复制成功状态：只改变颜色，不改变宽度 */
+.custom-item-btn.copied {
+  background: rgba(82, 196, 26, 0.15);
+  border-color: rgba(82, 196, 26, 0.4);
+  color: #52c41a;
+}
+
+/* 复制成功的 ✓ 标记 */
+.copy-check {
+  display: inline-block;
+  margin-right: 4px;
+  font-weight: 700;
+}
+
+/* 全屏时密码箱按钮更大 */
+.hud.fullscreen .custom-item-btn {
+  flex: 0 0 calc(33.333% - 16px);
+  padding: 14px 22px;
+  font-size: 17px;
+}
+
+/* 主密码锁定指示器 */
+.lock-indicator {
+  margin-left: 6px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* 快速访问主密码输入框 */
+.quick-password-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.quick-password-field {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #e6e9f5;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.quick-password-field:focus {
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.quick-password-field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.quick-password-unlock-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.quick-password-unlock-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+.quick-password-cancel-btn {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.quick-password-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.quick-password-error {
+  width: 100%;
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #ea6668;
+}

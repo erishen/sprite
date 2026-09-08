@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Sprite",
+  "version": "0.1.0",
+  "identifier": "cn.erishen.sprite",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "title": "Sprite",
+        "transparent": true,
+        "alwaysOnTop": true,
+        "decorations": false,
+        "shadow": false,
+        "fullscreen": false,
+        "resizable": true,
+        "width": 420,
+        "height": 500,
+        "minWidth": 340,
+        "minHeight": 400
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

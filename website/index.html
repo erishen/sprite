@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprite - 轻量级桌面悬浮助手</title>
+  <meta name="description" content="Sprite 是一个轻量级的桌面悬浮助手，集成系统监控、番茄钟、快捷方式和多 AI 后端聊天。开源免费，Tauri + Rust 构建。">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: #0f0f13;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 60px;
+      background: linear-gradient(180deg, rgba(99, 102, 241, 0.1) 0%, transparent 100%);
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #9ca3af;
+      max-width: 600px;
+      margin: 0 auto 32px;
+    }
+    .badges {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    /* Download buttons */
+    .download-section {
+      padding: 40px 0;
+    }
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .download-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .download-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(129, 140, 248, 0.3);
+      transform: translateY(-2px);
+    }
+    .download-card .platform-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .download-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #e5e7eb;
+    }
+    .download-card p {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 16px;
+    }
+    .download-btn {
+      display: inline-block;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .download-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+    .download-btn.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Features */
+    .features {
+      padding: 60px 0;
+    }
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .section-subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 40px;
+      font-size: 15px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .feature-card .icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #e5e7eb;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    /* Notice */
+    .notice {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 40px 0;
+    }
+    .notice h4 {
+      color: #fbbf24;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .notice p {
+      font-size: 14px;
+      color: #d1d5db;
+    }
+    .notice code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 40px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    footer a {
+      color: #818cf8;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>Sprite</h1>
+      <p>轻量级桌面悬浮助手，集成系统监控、番茄钟、快捷方式和多 AI 后端聊天。开源免费，Tauri + Rust 构建。</p>
+      <div class="badges">
+        <span class="badge">🍎 macOS</span>
+        <span class="badge">🐧 Linux</span>
+        <span class="badge">🪟 Windows</span>
+        <span class="badge">⚡ 内存 &lt; 50MB</span>
+        <span class="badge">🔓 MIT 开源</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download -->
+  <section class="download-section">
+    <div class="container">
+      <h2 class="section-title">下载</h2>
+      <p class="section-subtitle">选择你的平台，下载最新版本</p>
+
+      <div class="download-grid">
+        <div class="download-card">
+          <div class="platform-icon">🍎</div>
+          <h3>macOS</h3>
+          <p>.dmg 安装包<br>支持 Apple Silicon / Intel</p>
+          <a href="https://github.com/erishen/sprite/releases/latest" class="download-btn" target="_blank">下载 .dmg</a>
+        </div>
+
+        <div class="download-card">
+          <div class="platform-icon">🐧</div>
+          <h3>Linux</h3>
+          <p>.AppImage / .deb<br>开箱即用</p>
+          <a href="https://github.com/erishen/sprite/releases/latest" class="download-btn" target="_blank">下载</a>
+        </div>
+
+        <div class="download-card">
+          <div class="platform-icon">🪟</div>
+          <h3>Windows</h3>
+          <p>.exe / .msi 安装包<br>支持 Win10 / Win11</p>
+          <a href="https://github.com/erishen/sprite/releases/latest" class="download-btn" target="_blank">下载 .exe</a>
+        </div>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="https://github.com/erishen/sprite/releases" class="download-btn secondary" target="_blank">查看所有版本 →</a>
+      </div>
+
+      <!-- macOS notice -->
+      <div class="notice">
+        <h4>⚠️ macOS 用户请注意</h4>
+        <p>由于未缴纳苹果开发者账号费用，应用未经过公证。首次打开时可能提示"无法打开"，请：</p>
+        <p style="margin-top: 8px;">右键点击应用 → 选择"打开" → 在弹窗中再次点击"打开"</p>
+        <p style="margin-top: 8px;">或在终端执行：<code>xattr -cr /Applications/Sprite.app</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">功能特性</h2>
+      <p class="section-subtitle">为效率而生的桌面工具</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon">📊</div>
+          <h3>系统监控</h3>
+          <p>实时显示 CPU、内存、硬盘、网络状态。最小化横条也能看到关键指标，负载过高时颜色预警。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">🍅</div>
+          <h3>番茄钟</h3>
+          <p>自定义工作/休息时长，声音 + 系统通知提醒，每日完成统计，数据本地持久化。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">🚀</div>
+          <h3>快捷方式</h3>
+          <p>JSON 配置网页、应用、脚本快捷方式。公开/私密配置分离，一键启动常用工具。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">🤖</div>
+          <h3>多 AI 后端</h3>
+          <p>同时接入 Resolve Studio、Spring Harness、Resolve Harness 和内置 LLM。每个后端独立窗口，互不干扰。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">📋</div>
+          <h3>剪贴板历史</h3>
+          <p>自动记录剪贴板历史，支持搜索和快速复制。所有数据本地存储，不上传任何服务器。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">⚡</div>
+          <h3>极致轻量</h3>
+          <p>Tauri + Rust 构建，内存占用 &lt; 50MB。对比 Electron 应用动辄 200MB+，真正的轻量级。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">🔒</div>
+          <h3>隐私优先</h3>
+          <p>不收集任何用户数据，所有数据本地存储。AI 请求由用户自行配置 API Key，直接发送至 AI 服务商。</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="icon">🔧</div>
+          <h3>高度可定制</h3>
+          <p>快捷方式、AI 后端、番茄钟时长均可配置。开源透明，欢迎提交 PR 扩展功能。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Sprite — 轻量级桌面悬浮助手</p>
+      <p>本软件按"现状"提供，不提供任何担保。使用本软件产生的一切风险由使用者自行承担。</p>
+      <div class="footer-links">
+        <a href="https://github.com/erishen/sprite" target="_blank">GitHub</a>
+        <a href="https://github.com/erishen/sprite/issues" target="_blank">反馈问题</a>
+        <a href="https://erishen.cn" target="_blank">个人网站</a>
+        <a href="https://x.com/erishen" target="_blank">X (Twitter)</a>
+      </div>
+      <p style="margin-top: 16px;">© 2026 erishen. MIT License.</p>
+    </div>
+  </footer>
+</body>
+</html>
