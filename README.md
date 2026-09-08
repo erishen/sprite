@@ -170,7 +170,7 @@ sprite/
 ├── package.json              # pnpm scripts: dev / build / tauri
 ├── .env.example              # environment variable template (copy to .env)
 ├── README.md                 # English documentation
-├── README.zh.md              # 中文文档
+├── README.zh.md              # Chinese documentation
 └── vite.config.ts
 ```
 
