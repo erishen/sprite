@@ -24,6 +24,11 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -44,14 +49,14 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev
 
-      - name: Install npm dependencies
-        run: npm ci
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
 
       - name: Rust format check
         run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
@@ -60,7 +65,7 @@ jobs:
         run: cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 
       - name: Build frontend
-        run: npm run build
+        run: pnpm run build
 
       - name: Build Tauri app
-        run: npm run tauri build -- --debug
+        run: pnpm run tauri build -- --debug
