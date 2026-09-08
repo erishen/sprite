@@ -8,10 +8,114 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sprite</title>
+    <style>
+      /* 防止白屏：设置与应用一致的深色背景 */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #1a1a2e;
+        overflow: hidden;
+      }
+
+      /* 初始加载动画容器 */
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+      }
+
+      #initial-loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      /* 加载动画：旋转的圆环 */
+      .loader-spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid rgba(99, 102, 241, 0.2);
+        border-top-color: #6366f1;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      /* 加载文字 */
+      .loader-text {
+        margin-top: 16px;
+        color: #a5b4fc;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      /* 小星星装饰（代表 Sprite） */
+      .loader-star {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #fbbf24;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        opacity: 0.6;
+        animation: twinkle 2s ease-in-out infinite;
+      }
+
+      .loader-star:nth-child(1) { top: 20%; left: 25%; animation-delay: 0s; }
+      .loader-star:nth-child(2) { top: 30%; right: 20%; animation-delay: 0.5s; }
+      .loader-star:nth-child(3) { bottom: 25%; left: 30%; animation-delay: 1s; }
+      .loader-star:nth-child(4) { bottom: 35%; right: 25%; animation-delay: 1.5s; }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes twinkle {
+        0%, 100% { opacity: 0.3; transform: scale(0.8); }
+        50% { opacity: 0.9; transform: scale(1.2); }
+      }
+    </style>
   </head>
 
   <body>
+    <!-- 初始加载动画（React 加载完成后会被移除） -->
+    <div id="initial-loader">
+      <div class="loader-star"></div>
+      <div class="loader-star"></div>
+      <div class="loader-star"></div>
+      <div class="loader-star"></div>
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Sprite 加载中...</div>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // React 应用加载完成后，隐藏加载动画
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          var loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.classList.add('hidden');
+            // 动画结束后移除元素
+            setTimeout(function() {
+              if (loader.parentNode) {
+                loader.parentNode.removeChild(loader);
+              }
+            }, 300);
+          }
+        }, 200);
+      });
+    </script>
   </body>
 </html>
