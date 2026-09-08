@@ -14,9 +14,9 @@
 - **番茄钟** — 25 分钟工作 / 5 分钟休息（可通过 ⚙ 设置自定义），声音 + 系统通知提醒，自动切换下一阶段，每日完成计数，localStorage 持久化
 - **快捷启动** — 三类按钮分组：常用网页 / 本地应用 / 快捷操作：在默认浏览器中打开 URL、通过 bundle ID 启动本地应用（`open -b`）、或在后台运行 shell 单行命令。通过 JSON 文件配置：`src/config/launchers.public.json`（可提交）+ `src/config/launchers.local.json`（gitignore，私密）
 - **聊天面板** — 四种悬浮聊天窗口（H/S/R/🤖），每种最多 3 个窗口：
-  - **H** — Resolve Harness（`http://127.0.0.1:8899`）
-  - **S** — Spring Harness（`http://127.0.0.1:8080`）
-  - **R** — Resolve Studio（`http://127.0.0.1:8787`）
+  - **H** — [Resolve Harness](https://github.com/erishen/resolve-harness)（`http://127.0.0.1:8899`）
+  - **S** — [Spring Harness](https://github.com/erishen/spring-harness)（`http://127.0.0.1:8080`）
+  - **R** — [Resolve Studio](https://github.com/erishen/resolve-studio)（`http://127.0.0.1:8787`）
   - **🤖** — 内置 LLM（OpenAI 兼容 API，通过设置页面或 `.env` 配置）
   每个面板支持流式 Markdown、工具调用状态、多轮上下文、对话历史持久化、剪贴板历史、提示词模板
 - **设置页面** — 可视化配置所有 AI 后端和内置 LLM（头部 ⚙ 按钮或托盘菜单）；配置保存到本地 JSON，为空时回退到 `.env`

@@ -10,11 +10,11 @@ A floating **desktop sprite** (system monitor, pomodoro timer, quick links, chat
 
 - **System monitor** — CPU %, memory, disk usage (macOS `df -H`, 1000-base, matches Finder), and network (local IP + public IP with 5-min cache), polled every 3s from a Rust `system_stats` command (`sysinfo`); bars turn amber/red as load rises
 - **Pomodoro timer** — 25-min work / 5-min break (customizable via ⚙ settings), sound + system notification reminders, auto-advance, daily completed count, localStorage persistence
-- **Quick launchers** — three kinds of buttons grouped as 常用网页 / 本地应用 / 快捷操作: open URLs in the default browser, launch local apps by bundle ID (`open -b`), or run shell one-liners in the background. Configured via JSON files: `src/config/launchers.public.json` (committable) + `src/config/launchers.local.json` (gitignored, private)
+- **Quick launchers** — three kinds of buttons grouped as **Web Links** / **Local Apps** / **Quick Actions**: open URLs in the default browser, launch local apps by bundle ID (`open -b`), or run shell one-liners in the background. Configured via JSON files: `src/config/launchers.public.json` (committable) + `src/config/launchers.local.json` (gitignored, private)
 - **Chat panels** — four types of floating chat windows (H/S/R/🤖), each max 3 windows:
-  - **H** — Resolve Harness (`http://127.0.0.1:8899`)
-  - **S** — Spring Harness (`http://127.0.0.1:8080`)
-  - **R** — Resolve Studio (`http://127.0.0.1:8787`)
+  - **H** — [Resolve Harness](https://github.com/erishen/resolve-harness) (`http://127.0.0.1:8899`)
+  - **S** — [Spring Harness](https://github.com/erishen/spring-harness) (`http://127.0.0.1:8080`)
+  - **R** — [Resolve Studio](https://github.com/erishen/resolve-studio) (`http://127.0.0.1:8787`)
   - **🤖** — Built-in LLM (OpenAI-compatible API, configured via settings page or `.env`)
   Each panel supports streaming markdown, tool-call status, multi-turn context, conversation history persistence, clipboard history, and prompt templates
 - **Settings page** — visual configuration UI for all AI backends and built-in LLM (⚙ button in header or tray menu); configs saved to local JSON, falls back to `.env`
@@ -55,6 +55,18 @@ The window is a **transparent, frameless, always-on-top widget** that floats ove
 | Monitor | `sysinfo` (CPU + memory + disk) |
 | Resolve bridge | `resolve.rs` — reqwest SSE proxy → tauri `Channel` → React |
 | Package manager | pnpm |
+
+## Related projects
+
+Sprite works with these companion backend services:
+
+| Project | Description | Default Port |
+| --- | --- | --- |
+| [Resolve Harness](https://github.com/erishen/resolve-harness) | Synchronous Q&A + tool trace backend | `:8899` |
+| [Spring Harness](https://github.com/erishen/spring-harness) | Spring AI Agent with ReAct reasoning + SSE streaming | `:8080` |
+| [Resolve Studio](https://github.com/erishen/resolve-studio) | Cordis agent runtime with tool calling + sandbox | `:8787` |
+
+Each can be opened as a floating chat panel (H / S / R) from the Sprite UI.
 
 ## Quick start
 
@@ -230,7 +242,7 @@ make test        # run frontend tests (vitest)
 
 ### Settings page (recommended)
 
-Click the ⚙ button in the header or "⚙ 设置" in the tray menu to open the visual settings page. All AI backend configurations can be set there, and they take effect immediately.
+Click the ⚙ button in the header or "⚙ Settings" in the tray menu to open the visual settings page. All AI backend configurations can be set there, and they take effect immediately.
 
 ### Environment variables (fallback)
 
@@ -247,9 +259,9 @@ See `.env.example` for all available options. Settings page values take preceden
 - **New Rust command** — add `#[tauri::command] fn my_cmd(...)` in `src-tauri/src/lib.rs` and register it in `invoke_handler`; call it from the frontend with `invoke("my_cmd", { ... })`.
 - **Edit the quick launchers** — edit `src/config/launchers.public.json` (public) or `src/config/launchers.local.json` (private, gitignored):
   ```json
-  { "kind": "url",    "label": "GitHub", "url": "https://github.com" }
-  { "kind": "app",    "label": "终端",   "app": "Terminal" }
-  { "kind": "script", "label": "发布博客", "command": "~/bin/publish-blog.sh" }
+  { "kind": "url",    "label": "GitHub",       "url": "https://github.com" }
+  { "kind": "app",    "label": "Terminal",     "app": "Terminal" }
+  { "kind": "script", "label": "Publish Blog", "command": "~/bin/publish-blog.sh" }
   ```
   Scripts run detached with null stdio; to watch a long task live wrap it in a terminal, e.g. `command: "open -a Terminal ~/bin/task.sh"`.
 - **Window / tray behavior** — window flags live in `src-tauri/tauri.conf.json`; the tray icon + menu are built in the `setup` hook of `src-tauri/src/lib.rs`. Hiding/showing the window from JS needs the `core:window:allow-hide` / `allow-show` permissions in `src-tauri/capabilities/default.json`.
