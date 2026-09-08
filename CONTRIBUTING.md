@@ -13,7 +13,7 @@
 ### 前置要求
 
 - **Node.js** >= 22.0.0（推荐 24 LTS，使用 [nvm](https://github.com/nvm-sh/nvm) 管理版本）
-- **npm** >= 10.0.0
+- **pnpm** >= 9.0.0
 - **Rust** >= 1.75.0（通过 [rustup](https://rustup.rs/) 安装）
 - **macOS** 12+（当前主要支持 macOS，Windows/Linux 待验证）
 
@@ -25,7 +25,7 @@ git clone https://github.com/erishen/sprite.git
 cd sprite
 
 # 安装前端依赖
-npm install
+pnpm install
 ```
 
 ### 配置环境变量

@@ -21,7 +21,7 @@
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
 # 启动开发服务器
 make dev
@@ -38,7 +38,7 @@ make build
 
 ```bash
 # 前端单元测试
-npm test
+pnpm test
 ```
 
 ## 相关链接

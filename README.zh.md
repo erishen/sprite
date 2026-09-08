@@ -56,19 +56,19 @@
 | 启动 | `launch` 命令（std::process，分离式 spawn） |
 | 监控 | `sysinfo`（CPU + 内存 + 磁盘） |
 | Resolve 桥接 | `resolve.rs` — reqwest SSE 代理 → tauri `Channel` → React |
-| 包管理器 | npm |
+| 包管理器 | pnpm |
 
 ## 快速开始
 
 ```bash
-npm install          # 安装前端依赖（Tauri CLI 作为 devDependency）
-npm run tauri dev    # 启动应用，支持热重载（vite 在 :1420 + Rust）
+pnpm install          # 安装前端依赖（Tauri CLI 作为 devDependency）
+pnpm run tauri dev    # 启动应用，支持热重载（vite 在 :1420 + Rust）
 ```
 
 生产构建：
 
 ```bash
-npm run tauri build  # 打包平台安装包（如 macOS 的 .app / .dmg）
+pnpm run tauri build  # 打包平台安装包（如 macOS 的 .app / .dmg）
 ```
 
 ## 项目结构
@@ -94,7 +94,7 @@ sprite/
 │   └── icons/
 ├── public/              # Vite 服务的静态资源
 ├── index.html
-├── package.json         # npm 脚本：dev / build / tauri
+├── package.json         # pnpm 脚本：dev / build / tauri
 ├── .env.example         # 环境变量模板（复制为 .env）
 ├── README.md            # 英文文档
 ├── README.zh.md         # 中文文档
@@ -104,8 +104,8 @@ sprite/
 ## 常用命令
 
 ```bash
-make dev         # npm run tauri dev — 运行桌面应用，支持热重载
-make build       # npm run tauri build — 生成发布包
+make dev         # pnpm run tauri dev — 运行桌面应用，支持热重载
+make build       # pnpm run tauri build — 生成发布包
 make fe-build    # 仅构建前端（tsc && vite build → dist/）
 make check       # cargo check — 验证 Rust 编译（需要 dist/ 存在）
 make clean       # 删除 node_modules、dist 和 src-tauri/target

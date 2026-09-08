@@ -75,7 +75,7 @@ Sprite 是一个轻量级的桌面悬浮助手，核心功能包括：
 |------|------|
 | make | 构建脚本管理 |
 | cargo | Rust 包管理 |
-| npm | 前端包管理 |
+| pnpm | 前端包管理 |
 | rust-analyzer | Rust IDE 支持 |
 
 ---
@@ -567,12 +567,12 @@ HudHeader / 托盘菜单显示
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
 # 启动开发服务器（自动热重载）
 make dev
 # 或
-npm run tauri dev
+pnpm run tauri dev
 ```
 
 ### 11.2 生产构建
@@ -581,7 +581,7 @@ npm run tauri dev
 # 构建生产版本
 make build
 # 或
-npm run tauri build
+pnpm run tauri build
 
 # 构建产物位置
 # src-tauri/target/release/bundle/
@@ -593,7 +593,7 @@ npm run tauri build
 
 ```bash
 # 运行前端单元测试
-npm test
+pnpm test
 
 # 运行 Rust 测试
 cd src-tauri && cargo test

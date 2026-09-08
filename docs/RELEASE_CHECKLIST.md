@@ -3,9 +3,9 @@
 发布新版本前，请按以下清单逐项检查：
 
 ## 代码质量
-- [ ] `npm run build` 构建成功
-- [ ] `npx tsc --noEmit` 无类型错误
-- [ ] `npm test` 所有测试通过
+- [ ] `pnpm run build` 构建成功
+- [ ] `pnpm exec tsc --noEmit` 无类型错误
+- [ ] `pnpm test` 所有测试通过
 - [ ] `cargo fmt -- --check` 代码格式正确
 - [ ] `cargo clippy -- -D warnings` 无警告
 

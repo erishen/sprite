@@ -54,19 +54,19 @@ The window is a **transparent, frameless, always-on-top widget** that floats ove
 | Launch | `launch` command (std::process, detached spawn) |
 | Monitor | `sysinfo` (CPU + memory + disk) |
 | Resolve bridge | `resolve.rs` — reqwest SSE proxy → tauri `Channel` → React |
-| Package manager | npm |
+| Package manager | pnpm |
 
 ## Quick start
 
 ```bash
-npm install          # install frontend deps (Tauri CLI comes as devDependency)
-npm run tauri dev    # launch the app with hot-reload (vite on :1420 + Rust)
+pnpm install          # install frontend deps (Tauri CLI comes as devDependency)
+pnpm run tauri dev    # launch the app with hot-reload (vite on :1420 + Rust)
 ```
 
 Production build:
 
 ```bash
-npm run tauri build  # bundles the platform installer (e.g. .app / .dmg on macOS)
+pnpm run tauri build  # bundles the platform installer (e.g. .app / .dmg on macOS)
 ```
 
 ## Project structure
@@ -155,7 +155,7 @@ sprite/
 │   └── icons/
 ├── public/                   # static assets served by Vite
 ├── index.html
-├── package.json              # npm scripts: dev / build / tauri
+├── package.json              # pnpm scripts: dev / build / tauri
 ├── .env.example              # environment variable template (copy to .env)
 ├── README.md                 # English documentation
 ├── README.zh.md              # 中文文档
@@ -218,8 +218,8 @@ External services (resolve-studio / spring-harness / resolve-harness / OpenAI AP
 ## Common commands
 
 ```bash
-make dev         # npm run tauri dev — run the desktop app with hot reload
-make build       # npm run tauri build — produce release bundles
+make dev         # pnpm run tauri dev — run the desktop app with hot reload
+make build       # pnpm run tauri build — produce release bundles
 make fe-build    # build frontend only (tsc && vite build → dist/)
 make check       # cargo check — verify Rust compiles (needs dist/ to exist)
 make clean       # remove node_modules, dist and src-tauri/target
