@@ -171,7 +171,7 @@ pub fn run() {
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| {
-                    tray::handle_menu_event(&app, &event);
+                    tray::handle_menu_event(app, &event);
                 })
                 .on_tray_icon_event(|tray, event| {
                     // 左键点击托盘图标：还原最近收起的面板窗（label 含 "-"），

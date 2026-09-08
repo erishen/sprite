@@ -136,7 +136,7 @@ pub async fn open_panel(app: tauri::AppHandle, kind: String) -> Result<String, S
         let avail = mp.x - mon_x; // 相对于显示器左边界的可用空间
                                   // 重叠量：最大 380px（子窗口宽度 440，只留 60px 可见），确保多个子窗口都能在屏幕内
         let ov = if n_cols > 1.0 {
-            ((needed - avail) / (n_cols - 1.0)).max(0.0).min(380.0)
+            ((needed - avail) / (n_cols - 1.0)).clamp(0.0, 380.0)
         } else {
             0.0
         };

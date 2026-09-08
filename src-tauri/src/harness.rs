@@ -183,21 +183,20 @@ pub async fn harness_chat(
                             return;
                         }
                     }
-                    "tool_result" => {
+                    "tool_result"
                         if on_event
                             .send(HarnessEvent::ToolResult { call: item.clone() })
                             .is_err()
-                        {
+                        => {
                             return;
                         }
-                    }
                     _ => {}
                 }
             }
         }
         if let Some(reply) = json.get("reply").and_then(|r| r.as_str()) {
-            if !reply.trim().is_empty() {
-                if on_event
+            if !reply.trim().is_empty()
+                && on_event
                     .send(HarnessEvent::Text {
                         text: reply.to_string(),
                     })
@@ -205,7 +204,6 @@ pub async fn harness_chat(
                 {
                     return;
                 }
-            }
         }
         let _ = on_event.send(HarnessEvent::Done);
     });
@@ -403,14 +401,13 @@ pub async fn harness_approve(
                         return Ok(());
                     }
                 }
-                "tool_result" => {
+                "tool_result"
                     if on_event
                         .send(HarnessEvent::ToolResult { call: item.clone() })
                         .is_err()
-                    {
+                    => {
                         return Ok(());
                     }
-                }
                 _ => {}
             }
         }
@@ -418,8 +415,8 @@ pub async fn harness_approve(
 
     // 3. 处理 reply（回复文本）
     if let Some(reply) = json.get("reply").and_then(|r| r.as_str()) {
-        if !reply.trim().is_empty() {
-            if on_event
+        if !reply.trim().is_empty()
+            && on_event
                 .send(HarnessEvent::Text {
                     text: reply.to_string(),
                 })
@@ -427,7 +424,6 @@ pub async fn harness_approve(
             {
                 return Ok(());
             }
-        }
     }
 
     // 4. 发送 Done 事件

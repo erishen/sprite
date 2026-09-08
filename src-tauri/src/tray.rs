@@ -90,14 +90,14 @@ pub fn build_tray_menu(
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-cpu",
-            &format!("CPU: {:.0}%", cpu),
+            format!("CPU: {:.0}%", cpu),
             false,
             None::<&str>,
         )?));
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-mem",
-            &format!(
+            format!(
                 "内存: {:.1}/{:.1} GB ({}%)",
                 mem_used, mem_total, mem_percent
             ),
@@ -107,7 +107,7 @@ pub fn build_tray_menu(
         items.push(Box::new(MenuItem::with_id(
             app,
             "sys-disk",
-            &format!(
+            format!(
                 "磁盘: {:.0}/{:.0} GB ({}%)",
                 disk_used, disk_total, disk_percent
             ),
@@ -168,7 +168,7 @@ pub fn build_tray_menu(
     items.push(Box::new(MenuItem::with_id(
         app,
         "win-head",
-        &format!("窗口（{}）", panels.len()),
+        format!("窗口（{}）", panels.len()),
         false,
         None::<&str>,
     )?));
@@ -184,8 +184,8 @@ pub fn build_tray_menu(
         for lbl in panels {
             items.push(Box::new(MenuItem::with_id(
                 app,
-                &format!("focus-{lbl}"),
-                &format!("⇱ {lbl}"),
+                format!("focus-{lbl}"),
+                format!("⇱ {lbl}"),
                 true,
                 None::<&str>,
             )?));
