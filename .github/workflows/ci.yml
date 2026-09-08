@@ -50,6 +50,11 @@ jobs:
       - name: Install pnpm dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Create local config files (gitignored)
+        run: |
+          echo '[]' > src/config/launchers.local.json
+          echo '[]' > src/config/prompts.local.json
+
       - name: TypeScript check
         run: pnpm exec tsc --noEmit
 
