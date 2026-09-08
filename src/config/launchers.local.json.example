@@ -1,0 +1,5 @@
+[
+  { "kind": "url", "label": "示例-私有网页", "url": "https://example.com/private" },
+  { "kind": "app", "label": "示例-私有应用", "app": "Terminal" },
+  { "kind": "script", "label": "示例-私有脚本", "command": "echo 'hello private'" }
+]
