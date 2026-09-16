@@ -459,6 +459,30 @@ function MainHud() {
     };
   }, [appWindow]);
 
+  // 监听显示器变化（合屏/开屏、多显示器切换），触发窗口尺寸重新适应
+  useEffect(() => {
+    const onDisplayChange = () => {
+      window.setTimeout(() => { fitRef.current(); }, 300);
+    };
+
+    // macOS displayChange 通过 matchMedia 监听
+    const displayQuery = window.matchMedia("(display-change: active)");
+    displayQuery.addEventListener?.("change", onDisplayChange);
+
+    // 兜底：监听 window resize 和 focus
+    const onResize = () => {
+      window.setTimeout(() => { fitRef.current(); }, 200);
+    };
+    window.addEventListener("resize", onResize);
+    window.addEventListener("focus", onResize);
+
+    return () => {
+      displayQuery.removeEventListener?.("change", onDisplayChange);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("focus", onResize);
+    };
+  }, []);
+
   const cpu = stats ? Math.round(stats.cpu) : null;
   const memPct = stats ? Math.round((stats.mem_used_gb / stats.mem_total_gb) * 100) : null;
   const diskPct = stats && stats.disk_total_gb > 0

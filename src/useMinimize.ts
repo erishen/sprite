@@ -96,5 +96,42 @@ export function useMinimize(
     return () => window.removeEventListener("keydown", onKey);
   }, [toggle]);
 
+  // 监听显示器状态变化（合屏/开屏、多显示器切换等）
+  // 合屏后屏幕参数可能变化，之前保存的位置可能失效，需要更新保存的值
+  useEffect(() => {
+    let rafId = 0;
+    const handler = () => {
+      if (!saved.current) return;
+      // 延迟执行，等显示器状态稳定
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(async () => {
+        try {
+          // 用当前实际窗口状态更新保存的值，确保恢复时位置正确
+          const currentSize = await appWindow.outerSize();
+          const currentPos = await appWindow.outerPosition();
+          saved.current = { size: currentSize, pos: currentPos };
+        } catch {
+          // 静默失败，不影响正常使用
+        }
+      });
+    };
+
+    // macOS displayChange 通过 matchMedia 监听
+    const displayQuery = window.matchMedia("(display-change: active)");
+    const onDisplayChange = () => handler();
+    displayQuery.addEventListener?.("change", onDisplayChange);
+
+    // 兜底：监听 window resize 和 focus 事件
+    window.addEventListener("resize", handler);
+    window.addEventListener("focus", handler);
+
+    return () => {
+      displayQuery.removeEventListener?.("change", onDisplayChange);
+      window.removeEventListener("resize", handler);
+      window.removeEventListener("focus", handler);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+  }, [appWindow]);
+
   return [minimized, toggle];
 }

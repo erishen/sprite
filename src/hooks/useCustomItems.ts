@@ -71,11 +71,17 @@ export function useCustomItems(masterPasswordEnabled?: boolean, masterPassword?:
     setLoaded(true);
   }, []);
 
-  // 保存到 localStorage
-  const persist = useCallback((newItems: CustomItem[]) => {
-    setItems(newItems);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
-  }, []);
+  // 保存到 localStorage（函数式更新，避免闭包陈旧）
+  const persist = useCallback(
+    (updater: CustomItem[] | ((prev: CustomItem[]) => CustomItem[])) => {
+      setItems((prev) => {
+        const next = typeof updater === "function" ? (updater as (prev: CustomItem[]) => CustomItem[])(prev) : updater;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    [],
+  );
 
   /** 添加新配置项 */
   const add = useCallback(
@@ -89,10 +95,10 @@ export function useCustomItems(masterPasswordEnabled?: boolean, masterPassword?:
         label: label.trim(),
         content: encrypted,
       };
-      persist([...items, newItem]);
+      persist((prev) => [...prev, newItem]);
       return newItem;
     },
-    [items, persist, enabled, unlocked],
+    [persist, enabled, unlocked],
   );
 
   /** 更新配置项 */
@@ -102,12 +108,13 @@ export function useCustomItems(masterPasswordEnabled?: boolean, masterPassword?:
         throw new Error("密码箱已锁定，请先解锁");
       }
       const encrypted = await encrypt(content);
-      const newItems = items.map((item) =>
-        item.id === id ? { ...item, label: label.trim(), content: encrypted } : item,
+      persist((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, label: label.trim(), content: encrypted } : item,
+        ),
       );
-      persist(newItems);
     },
-    [items, persist, enabled, unlocked],
+    [persist, enabled, unlocked],
   );
 
   /** 删除配置项 */
@@ -116,9 +123,9 @@ export function useCustomItems(masterPasswordEnabled?: boolean, masterPassword?:
       if (enabled && !unlocked) {
         throw new Error("密码箱已锁定，请先解锁");
       }
-      persist(items.filter((item) => item.id !== id));
+      persist((prev) => prev.filter((item) => item.id !== id));
     },
-    [items, persist, enabled, unlocked],
+    [persist, enabled, unlocked],
   );
 
   /** 获取解密后的内容 */

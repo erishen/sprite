@@ -24,16 +24,12 @@
   border-radius: 9px;
   cursor: pointer;
   text-align: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: center;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-  /* 禁止文字选中，避免双击选中 */
   user-select: none;
   -webkit-user-select: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .custom-item-btn:hover {
