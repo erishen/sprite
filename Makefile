@@ -1,6 +1,10 @@
 SHELL := /bin/bash
 
-.PHONY: help dev build check clean clean-macros fe-install fe-build test typecheck lint release
+# Sprite 使用独立 Cargo target 目录，避免与共享 workspace（ax-agent 等）互相覆盖产物
+TARGET_DIR := $(CURDIR)/target
+export CARGO_TARGET_DIR := $(TARGET_DIR)
+
+.PHONY: help dev build check clean clean-macros fe-install fe-build test typecheck lint release install install-dmg install-user
 
 help: ## 显示可用命令
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -47,11 +51,11 @@ check: ## Rust 编译检查（需先有 frontend dist/，否则 tauri 嵌入资�
 	cd src-tauri && cargo check
 
 clean: ## 清理前端产物与依赖
-	rm -rf node_modules dist src-tauri/target
+	rm -rf node_modules dist src-tauri/target $(TARGET_DIR)
 
-clean-macros: ## 删除共享 target 中所有宏库 .dylib 文件（解决 mismatched ABI 问题，cargo 会自动重新编译）
-	@echo "删除共享 target 中所有宏库 .dylib 文件..."
-	rm -f ../target/debug/deps/*.dylib
+clean-macros: ## 删除 Sprite 独立 target 中所有宏库 .dylib 文件（解决 mismatched ABI 问题，cargo 会自动重新编译）
+	@echo "删除 $(TARGET_DIR) 中所有宏库 .dylib 文件..."
+	rm -f $(TARGET_DIR)/debug/deps/*.dylib
 	@echo "完成。下次 make dev 时 cargo 会自动重新编译宏库。"
 
 typecheck: ## TypeScript 类型检查
@@ -68,3 +72,24 @@ release: ## 发布构建（先类型检查，再构建 release 安装包）
 	pnpm exec tsc --noEmit
 	@echo "=== 构建 release 安装包 ==="
 	pnpm run tauri build
+
+# 安装前停止运行中的 sprite 实例（与 dev 相同的清理思路：避免旧进程占住文件句柄或装完仍在跑旧版）
+KILL_SPRITE := @echo "[install] 停止运行中的 sprite 实例..." && \
+	pkill -f '/Applications/Sprite.app/Contents/MacOS/sprite' 2>/dev/null || true; \
+	pkill -f '$(HOME)/Applications/Sprite.app/Contents/MacOS/sprite' 2>/dev/null || true; \
+	pkill -f 'target/debug/sprite' 2>/dev/null || true; \
+	pkill -f 'target/release/sprite' 2>/dev/null || true; \
+	sleep 1
+
+install: build ## 先构建（含 local 配置），再安装 Sprite.app 到 /Applications（本地使用）
+	$(KILL_SPRITE)
+	bash scripts/install.sh
+
+install-dmg: ## 构建对外发布版（不含 local 配置），生成并校验 DMG
+	bash scripts/build-public.sh
+	$(KILL_SPRITE)
+	bash scripts/install.sh --dmg
+
+install-user: ## 安装 Sprite.app 到 ~/Applications（用户级）
+	$(KILL_SPRITE)
+	bash scripts/install.sh --user
