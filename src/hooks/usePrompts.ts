@@ -5,12 +5,12 @@ import type { PromptTemplate } from "../components/PromptTemplates";
 /** localStorage 键名（与 useDebugMode 保持一致） */
 const DEBUG_MODE_KEY = "sprite-debug-mode";
 
-/** 读取当前调试模式状态 */
+/** 读取当前调试模式状态（默认开启：无键视为开启，除非显式关闭过） */
 function isDebugMode(): boolean {
   try {
-    return localStorage.getItem(DEBUG_MODE_KEY) === "true";
+    return localStorage.getItem(DEBUG_MODE_KEY) !== "false";
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -29,7 +29,7 @@ export function usePrompts(): PromptTemplate[] {
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === DEBUG_MODE_KEY) {
-        setShowPrivate(e.newValue === "true");
+        setShowPrivate(e.newValue !== "false");
       }
     };
     window.addEventListener("storage", handler);

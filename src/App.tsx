@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, getCurrentWindow } from "@tauri-apps/api/window";
 import { useMinimize } from "./useMinimize";
@@ -156,14 +157,12 @@ function MainHud() {
   // 监听锁屏事件（来自托盘菜单或其他窗口）
   useEffect(() => {
     let unlisten: (() => void) | null = null;
-    import("@tauri-apps/api/event").then(({ listen }) => {
-      listen("lock-screen", () => {
-        if (settings.lockEnabled && settings.lockPassword.length > 0) {
-          setLocked(true);
-        }
-      }).then((fn) => {
-        unlisten = fn;
-      });
+    listen("lock-screen", () => {
+      if (settings.lockEnabled && settings.lockPassword.length > 0) {
+        setLocked(true);
+      }
+    }).then((fn) => {
+      unlisten = fn;
     });
     return () => {
       if (unlisten) unlisten();

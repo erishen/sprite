@@ -15,6 +15,7 @@ use tauri::tray::TrayIconBuilder;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
+mod bootstrap;
 mod builtin;
 mod export;
 mod harness;
@@ -73,6 +74,9 @@ pub fn run() {
             hotkey::unregister_all_hotkeys
         ])
         .setup(|app| {
+            // 首次启动时导入内置的 settings/history 数据（仅缺失时复制，不覆盖用户数据）。
+            bootstrap::seed_user_data(app);
+
             // Park the window in the top-right corner of the primary monitor.
             if let Some(window) = app.get_webview_window("main") {
                 if let Some(monitor) = app.primary_monitor()? {

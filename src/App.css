@@ -48,7 +48,6 @@ body {
   box-shadow: none;
   overflow: hidden;
   /* 移除 max-height 限制，让内容自然撑开，窗口高度自动适应内容 */
-}
   position: relative;
   transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transform-origin: 50% 40%;

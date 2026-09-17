@@ -7,15 +7,17 @@ const DEBUG_MODE_KEY = "sprite-debug-mode";
  * 调试模式 hook：控制是否展示私有配置（launchers.local.json / prompts.local.json）。
  * 状态持久化到 localStorage，主窗口和设置窗口之间共享。
  *
- * - 关闭（默认）：只展示公开配置（public），隐藏私有配置
- * - 开启：展示公开配置 + 私有配置（local）
+ * - 关闭：只展示公开配置（public），隐藏私有配置
+ * - 开启（默认）：展示公开配置 + 私有配置（local）
+ *
+ * 默认开启：无 localStorage 键（全新安装）时视为开启，除非用户显式关闭过。
  */
 export function useDebugMode() {
   const [debugMode, setDebugMode] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(DEBUG_MODE_KEY) === "true";
+      return localStorage.getItem(DEBUG_MODE_KEY) !== "false";
     } catch {
-      return false;
+      return true;
     }
   });
 
@@ -32,7 +34,7 @@ export function useDebugMode() {
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === DEBUG_MODE_KEY) {
-        setDebugMode(e.newValue === "true");
+        setDebugMode(e.newValue !== "false");
       }
     };
     window.addEventListener("storage", handler);

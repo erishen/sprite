@@ -22,8 +22,14 @@ export function useMinimize(
 ): [boolean, () => Promise<void>] {
   const [minimized, setMinimized] = useState(false);
   const saved = useRef<{ size: PhysicalSize | null; pos: PhysicalPosition | null } | null>(null);
+  const minimizedRef = useRef(false);
   const miniWidth = width ?? MIN_W;
   const offset = rightOffset ?? 0;
+
+  const setMinimizedBoth = (v: boolean) => {
+    minimizedRef.current = v;
+    setMinimized(v);
+  };
 
   const toggle = useCallback(async () => {
     try {
@@ -37,7 +43,7 @@ export function useMinimize(
         setTimeout(() => {
           appWindow.setAlwaysOnTop(true).catch(() => {});
         }, 100);
-        setMinimized(false);
+        setMinimizedBoth(false);
         onRestore?.();
         return;
       }
@@ -79,7 +85,7 @@ export function useMinimize(
       setTimeout(() => {
         appWindow.setAlwaysOnTop(true).catch(() => {});
       }, 100);
-      setMinimized(true);
+      setMinimizedBoth(true);
     } catch (e) {
       console.error("最小化失败", e);
     }
@@ -97,19 +103,24 @@ export function useMinimize(
   }, [toggle]);
 
   // 监听显示器状态变化（合屏/开屏、多显示器切换等）
-  // 合屏后屏幕参数可能变化，之前保存的位置可能失效，需要更新保存的值
+  // 合屏后 macOS 可能按系统 minimum 约束把最小化横条撑回正常窗口大小，
+  // 因此在显示环境变化时重新施加横条尺寸，保持 UI 不变。
   useEffect(() => {
     let rafId = 0;
     const handler = () => {
+      if (!minimizedRef.current) return;
       if (!saved.current) return;
       // 延迟执行，等显示器状态稳定
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(async () => {
         try {
-          // 用当前实际窗口状态更新保存的值，确保恢复时位置正确
-          const currentSize = await appWindow.outerSize();
+          const scale = await appWindow.scaleFactor().catch(() => 1);
+          const miniW = Math.round(miniWidth * scale);
+          const miniH = Math.round(MIN_H * scale);
+          await appWindow.setSize(new PhysicalSize(miniW, miniH));
+          // 只更新保存的位置（合屏/开屏后窗口可能被系统移动），保留原始尺寸用于还原
           const currentPos = await appWindow.outerPosition();
-          saved.current = { size: currentSize, pos: currentPos };
+          if (saved.current) saved.current = { size: saved.current.size, pos: currentPos };
         } catch {
           // 静默失败，不影响正常使用
         }

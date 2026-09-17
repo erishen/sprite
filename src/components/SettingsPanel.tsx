@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { emit } from "@tauri-apps/api/event";
 import { useSettings, type Settings } from "../hooks/useSettings";
 import { mergeConfig } from "../utils/mergedConfig";
 import { useDebugMode } from "../hooks/useDebugMode";
@@ -91,7 +92,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
       setConfirmMasterPassword("");
       // 保存成功后重新注册全局热键
       try {
-        await invoke("register_toggle_hotkey", { hotkeyStr: draft.hotkey });
+        await invoke("register_toggle_hotkey", { hotkey_str: draft.hotkey });
         console.log("[sprite] 全局热键已更新:", draft.hotkey);
       } catch (e) {
         console.error("[sprite] 注册全局热键失败:", e);
@@ -374,9 +375,7 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                       className="settings-btn-secondary"
                       onClick={() => {
                         // 发送锁屏事件，立即锁定应用
-                        import("@tauri-apps/api/event").then(({ emit }) => {
-                          emit("lock-screen", {});
-                        });
+                        emit("lock-screen", {});
                       }}
                       style={{ width: "100%" }}
                     >
