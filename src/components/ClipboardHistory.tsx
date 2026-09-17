@@ -13,11 +13,6 @@ export function ClipboardHistory({ enabled = true }: { enabled?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const copiedTimerRef = useRef<number | null>(null);
 
-  // 如果禁用剪贴板历史，不渲染按钮
-  if (!enabled) {
-    return null;
-  }
-
   // 点击历史记录：复制到剪贴板，并显示"已复制"提示
   const handleSelect = async (id: string, text: string) => {
     await select(text);
@@ -66,6 +61,13 @@ export function ClipboardHistory({ enabled = true }: { enabled?: boolean }) {
     const q = query.toLowerCase();
     return items.filter((item) => item.text.toLowerCase().includes(q));
   }, [items, query]);
+
+  // 如果禁用剪贴板历史，不渲染按钮。
+  // 注意：此 return 必须位于所有 hooks 之后（React 要求组件每次渲染
+  // hooks 数量一致），否则 enabled 变化会触发 "Rendered more/fewer hooks"。
+  if (!enabled) {
+    return null;
+  }
 
   const fmtTime = (ts: number) => {
     const d = new Date(ts);

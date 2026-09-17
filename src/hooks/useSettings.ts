@@ -84,7 +84,10 @@ export function useSettings() {
   const loadSettings = useCallback(async () => {
     try {
       const s = await invoke<Settings>("load_settings");
-      let loadedSettings = s || DEFAULT_SETTINGS;
+      // 与默认值合并：磁盘 settings.json 可能缺少新增字段（如
+      // clipboardHistoryEnabled），直接使用会导致 undefined 传播和
+      // 渲染行为跳变（如 ClipboardHistory 的 enabled 默认参数）。
+      let loadedSettings = { ...DEFAULT_SETTINGS, ...(s || {}) };
 
       // 如果启用了 Keychain，从 Keychain 加载 API Key
       if (loadedSettings.useKeychain) {
@@ -140,7 +143,7 @@ export function useSettings() {
     const interval = setInterval(async () => {
       try {
         const s = await invoke<Settings>("load_settings");
-        let loadedSettings = s || DEFAULT_SETTINGS;
+        let loadedSettings = { ...DEFAULT_SETTINGS, ...(s || {}) };
 
         // 如果启用了 Keychain，从 Keychain 加载 API Key
         if (loadedSettings.useKeychain) {
