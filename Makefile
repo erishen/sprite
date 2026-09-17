@@ -4,7 +4,7 @@ SHELL := /bin/bash
 TARGET_DIR := $(CURDIR)/target
 export CARGO_TARGET_DIR := $(TARGET_DIR)
 
-.PHONY: help dev build check clean clean-macros fe-install fe-build test typecheck lint release install install-dmg install-user
+.PHONY: help dev build build-app check clean clean-macros fe-install fe-build test typecheck lint release install install-dmg
 
 help: ## 显示可用命令
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -35,8 +35,11 @@ dev: ## 启动桌面应用（先彻底清理残留实例，再 vite 热更新 + 
 	@# 启用 sccache 编译缓存（提高重复编译速度）
 	pnpm run tauri dev
 
-build: ## 构建 release 安装包
+build: ## 构建 release 安装包（.app + DMG）
 	pnpm run tauri build
+
+build-app: ## 构建 release 的 .app（不生成 DMG，用于本地安装，避免污染发布包）
+	pnpm run tauri build --bundles app
 
 fe-install: ## 安装前端依赖
 	pnpm install
@@ -67,7 +70,7 @@ lint: ## 代码检查（TypeScript 类型 + Rust 编译检查）
 	@echo "=== Rust 编译检查 ==="
 	cd src-tauri && cargo check
 
-release: ## 发布构建（先类型检查，再构建 release 安装包）
+release: ## 发布构建（先类型检查，再构建 release 安装包：.app + DMG）
 	@echo "=== TypeScript 类型检查 ==="
 	pnpm exec tsc --noEmit
 	@echo "=== 构建 release 安装包 ==="
@@ -76,12 +79,11 @@ release: ## 发布构建（先类型检查，再构建 release 安装包）
 # 安装前停止运行中的 sprite 实例（与 dev 相同的清理思路：避免旧进程占住文件句柄或装完仍在跑旧版）
 KILL_SPRITE := @echo "[install] 停止运行中的 sprite 实例..." && \
 	pkill -f '/Applications/Sprite.app/Contents/MacOS/sprite' 2>/dev/null || true; \
-	pkill -f '$(HOME)/Applications/Sprite.app/Contents/MacOS/sprite' 2>/dev/null || true; \
 	pkill -f 'target/debug/sprite' 2>/dev/null || true; \
 	pkill -f 'target/release/sprite' 2>/dev/null || true; \
 	sleep 1
 
-install: build ## 先构建（含 local 配置），再安装 Sprite.app 到 /Applications（本地使用）
+install: build-app ## 先构建（含 local 配置，只生成 .app 不覆盖 DMG），再安装到 /Applications（本地使用）
 	$(KILL_SPRITE)
 	bash scripts/install.sh
 
@@ -89,7 +91,3 @@ install-dmg: ## 构建对外发布版（不含 local 配置），生成并校验
 	bash scripts/build-public.sh
 	$(KILL_SPRITE)
 	bash scripts/install.sh --dmg
-
-install-user: ## 安装 Sprite.app 到 ~/Applications（用户级）
-	$(KILL_SPRITE)
-	bash scripts/install.sh --user

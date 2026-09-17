@@ -4,9 +4,8 @@
 #
 # 用法:
 #   scripts/install.sh             # 从 bundle/macos 安装到 /Applications（系统级，默认）
-#   scripts/install.sh --user      # 安装到 ~/Applications（用户级）
 #   scripts/install.sh --dmg       # 从 bundle/dmg 挂载安装（验证 DMG 完整性后安装）
-#   多个参数可组合: --user --dmg
+#   多个参数可组合: --dmg --yes
 #   可选: SPRITE_DMG=/path/to.dmg  指定 DMG 路径
 
 set -euo pipefail
@@ -16,7 +15,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_NAME="Sprite"
 BASE_BUNDLE="$ROOT/target/release/bundle"
 APP_DIR_SRC="$BASE_BUNDLE/macos/$APP_NAME.app"
-# 默认装到系统级 /Applications；--user 时改用用户级 ~/Applications
+# 装到系统级 /Applications
 APPS_DIR="/Applications"
 # 全局挂载点：供 EXIT trap 清理用。函数局部变量在 set -u + 函数返回后会失效，
 # 导致 trap 清理时报 "unbound variable"。
@@ -104,11 +103,10 @@ main() {
   local use_dmg=0 use_yes=0
   for arg in "$@"; do
     case "$arg" in
-      --user) APPS_DIR="$HOME/Applications" ;;
       --dmg) use_dmg=1 ;;
       --yes) use_yes=1 ;;
-      --help|-h) echo "用法: $0 [--user] [--dmg] [--yes]  (默认安装到 /Applications)"; exit 0 ;;
-      *) echo "未知参数: $arg (可用: --user, --dmg, --yes)" >&2; exit 1 ;;
+      --help|-h) echo "用法: $0 [--dmg] [--yes]  (默认安装到 /Applications)"; exit 0 ;;
+      *) echo "未知参数: $arg (可用: --dmg, --yes)" >&2; exit 1 ;;
     esac
   done
 
