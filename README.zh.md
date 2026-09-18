@@ -232,3 +232,6 @@ sha256sum Sprite_*.AppImage
 欢迎提交 Issue 和 Pull Request！
 
 如果你觉得这个项目有用，欢迎给个 ⭐ Star 支持一下。
+
+## 相关文章
+- [桌面悬浮窗 Sprite：把系统监控、番茄钟与随身 AI 收进一块常驻小屏](https://erishen.cn/sprite/)

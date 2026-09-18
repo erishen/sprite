@@ -332,6 +332,9 @@ In no event shall the authors or copyright holders be liable for any claim, dama
 
 **By using this software, you agree to assume all risks associated with its use.**
 
+## Related Articles
+- [Sprite Desktop Floating Widget: Folding System Monitoring, Pomodoro, and a Pocket AI into One Always-On Panel](https://erishen.cn/sprite-en/)
+
 ## License
 
 This project is licensed under the **MIT License**.
