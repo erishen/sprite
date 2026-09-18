@@ -100,22 +100,5 @@
 
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // React 应用加载完成后，隐藏加载动画
-      window.addEventListener('load', function() {
-        setTimeout(function() {
-          var loader = document.getElementById('initial-loader');
-          if (loader) {
-            loader.classList.add('hidden');
-            // 动画结束后移除元素
-            setTimeout(function() {
-              if (loader.parentNode) {
-                loader.parentNode.removeChild(loader);
-              }
-            }, 300);
-          }
-        }, 200);
-      });
-    </script>
   </body>
 </html>

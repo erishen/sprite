@@ -59,3 +59,14 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     </Boundary>
   </React.StrictMode>,
 );
+
+// React 应用挂载完成后，隐藏初始加载动画（原 index.html 内联脚本移入，
+// 使生产 CSP 可用严格的 script-src 'self'）
+window.setTimeout(() => {
+  const loader = document.getElementById("initial-loader");
+  if (loader) {
+    loader.classList.add("hidden");
+    // 动画结束后移除元素
+    window.setTimeout(() => loader.remove(), 300);
+  }
+}, 200);
