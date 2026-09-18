@@ -78,12 +78,14 @@ impl StreamEvent for SpringEvent {
 }
 
 /// 调 spring-harness ReAct Agent SSE（`GET /chat/agent/react/stream`）。
+/// `token` 非空时附加 `Authorization: Bearer <token>`（默认本地 127.0.0.1 无需认证）。
 #[tauri::command]
 pub async fn spring_chat(
     win: String,
     base: String,
     message: String,
     model: String,
+    token: String,
     on_event: Channel<SpringEvent>,
 ) -> Result<(), String> {
     if message.trim().is_empty() {
@@ -95,12 +97,15 @@ pub async fn spring_chat(
         urlencode(&message),
         urlencode(&model)
     );
+    let token = token.trim().to_string();
     spawn_task(win, on_event, move || {
         let client = reqwest::Client::new();
         async move {
-            client
-                .get(&url)
-                .send()
+            let mut req = client.get(&url);
+            if !token.is_empty() {
+                req = req.bearer_auth(&token);
+            }
+            req.send()
                 .await
                 .map_err(|e| format!("请求 spring-harness 失败: {e}"))
         }
@@ -108,11 +113,16 @@ pub async fn spring_chat(
 }
 
 /// 拉取 spring-harness 运行状态（`GET /info`：工具/MCP/Knowledge/模型计数）。
+/// `token` 非空时附加 `Authorization: Bearer <token>`。
 #[tauri::command]
-pub async fn spring_info(base: String) -> Result<serde_json::Value, String> {
+pub async fn spring_info(base: String, token: String) -> Result<serde_json::Value, String> {
     let base = base_or(&base, DEFAULT_SPRING_BASE);
-    let resp = reqwest::Client::new()
-        .get(format!("{base}/info"))
+    let token = token.trim().to_string();
+    let mut req = reqwest::Client::new().get(format!("{base}/info"));
+    if !token.is_empty() {
+        req = req.bearer_auth(&token);
+    }
+    let resp = req
         .timeout(Duration::from_secs(5))
         .send()
         .await
@@ -127,11 +137,16 @@ pub async fn spring_info(base: String) -> Result<serde_json::Value, String> {
 }
 
 /// 拉取 spring-harness 可用模型列表（`GET /models`，enabled 项）。
+/// `token` 非空时附加 `Authorization: Bearer <token>`。
 #[tauri::command]
-pub async fn spring_models(base: String) -> Result<Vec<serde_json::Value>, String> {
+pub async fn spring_models(base: String, token: String) -> Result<Vec<serde_json::Value>, String> {
     let base = base_or(&base, DEFAULT_SPRING_BASE);
-    let resp = reqwest::Client::new()
-        .get(format!("{base}/models"))
+    let token = token.trim().to_string();
+    let mut req = reqwest::Client::new().get(format!("{base}/models"));
+    if !token.is_empty() {
+        req = req.bearer_auth(&token);
+    }
+    let resp = req
         .timeout(Duration::from_secs(5))
         .send()
         .await

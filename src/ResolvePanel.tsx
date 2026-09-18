@@ -19,6 +19,7 @@ import {
   RETRY_CHOICE_RE,
 } from "./utils/chatUtils";
 import { exportChatMessages, type ChatMessage } from "./utils/chatExport";
+import { getApiKeyFromKeychain } from "./utils/keychain";
 import { usePrompts } from "./hooks/usePrompts";
 import { useHistory } from "./hooks/useHistory";
 import type { ResolveEvent, Health, ToolLog, Turn } from "./types/chat";
@@ -269,11 +270,14 @@ export default function ResolvePanel({ onClose }: { onClose: () => void }) {
 
     const ch = new Channel<ResolveEvent>();
     ch.onmessage = (ev) => handleEvent(ev, assistantTurn.id);
+    // 从 Keychain 读取 resolve 的 API token（若有）作为请求认证头，远端部署时生效
+    const token = (await getApiKeyFromKeychain("resolve")) ?? "";
     try {
       await invoke("resolve_chat", {
         base: RESOLVE_BASE,
         messages: [...history, { role: "user", content: trimmed }],
         win: getCurrentWindow().label,
+        token,
         onEvent: ch,
       });
     } catch (e) {

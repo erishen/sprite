@@ -221,7 +221,7 @@ pub fn start_tray_poll(app: &tauri::AppHandle) {
             // 与前端 .env 默认一致的后端地址。
             let (r, s, h, sys) = futures_util::join!(
                 async { resolve_studio::resolve_health("http://127.0.0.1:8787".into()).await },
-                async { spring_harness::spring_models("http://127.0.0.1:8080".into()).await },
+                async { spring_harness::spring_models("http://127.0.0.1:8080".into(), "".into()).await },
                 async { harness::harness_health("http://127.0.0.1:8899".into()).await },
                 async { crate::system_stats::system_stats().await }
             );

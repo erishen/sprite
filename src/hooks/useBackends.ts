@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getApiKeyFromKeychain } from "../utils/keychain";
 
 export type BackendStatus = boolean | null; // null=检测中, true=在线, false=离线
 
@@ -28,9 +29,12 @@ export function useBackends(resolveBase: string, springBase: string, harnessBase
         .isVisible()
         .catch(() => true);
       if (!alive || !visible) return;
+      // spring_models 带认证头（Keychain 中 spring 的 API key，若有）
+      const springToken = (await getApiKeyFromKeychain("spring")) ?? "";
+      if (!alive) return;
       const [rh, sh, hh] = await Promise.allSettled([
         invoke<{ ok?: boolean }>("resolve_health", { base: resolveBase }),
-        invoke<unknown[]>("spring_models", { base: springBase }),
+        invoke<unknown[]>("spring_models", { base: springBase, token: springToken }),
         invoke<{ ok?: boolean }>("harness_health", { base: harnessBase }),
       ]);
       if (!alive) return;

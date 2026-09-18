@@ -179,11 +179,13 @@ pub async fn resolve_file(base: String, path: String) -> Result<serde_json::Valu
 }
 
 /// 调 resolve-studio `/api/chat`（OpenAI 兼容 messages）。SSE 事件经 Channel 推前端。
+/// `token` 非空时附加 `Authorization: Bearer <token>`（默认本地 127.0.0.1 无需认证）。
 #[tauri::command]
 pub async fn resolve_chat(
     win: String,
     base: String,
     messages: Vec<serde_json::Value>,
+    token: String,
     on_event: Channel<ResolveEvent>,
 ) -> Result<(), String> {
     if messages.is_empty() {
@@ -191,14 +193,16 @@ pub async fn resolve_chat(
     }
     let base = base_or(&base, DEFAULT_RESOLVE_BASE);
     let body = serde_json::json!({ "messages": messages });
+    let token = token.trim().to_string();
     spawn_task(win, on_event, move || {
         let client = reqwest::Client::new();
         let body = body.clone();
         async move {
-            client
-                .post(format!("{base}/api/chat"))
-                .json(&body)
-                .send()
+            let mut req = client.post(format!("{base}/api/chat")).json(&body);
+            if !token.is_empty() {
+                req = req.bearer_auth(&token);
+            }
+            req.send()
                 .await
                 .map_err(|e| format!("请求 resolve-studio 失败: {e}"))
         }

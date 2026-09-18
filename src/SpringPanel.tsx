@@ -10,6 +10,7 @@ import { ChatMiniBar } from "./components/ChatMiniBar";
 import { ExampleChips, type PanelExample } from "./components/ExampleChips";
 import { copyText } from "./utils/chatUtils";
 import { exportChatMessages, type ChatMessage } from "./utils/chatExport";
+import { getApiKeyFromKeychain } from "./utils/keychain";
 import { usePrompts } from "./hooks/usePrompts";
 import { useHistory } from "./hooks/useHistory";
 
@@ -200,12 +201,15 @@ export default function SpringPanel({ onClose }: { onClose: () => void }) {
     setRunning(true);
     const ch = new Channel<SpringEvent>();
     ch.onmessage = (ev) => handleEvent(ev, asTurn.id);
+    // 从 Keychain 读取 spring 的 API key（若有）作为请求认证头，远端部署时生效
+    const token = (await getApiKeyFromKeychain("spring")) ?? "";
     try {
       await invoke("spring_chat", {
         win,
         base: SPRING_BASE,
         message: trimmed,
         model,
+        token,
         onEvent: ch,
       });
     } catch (e) {
@@ -261,20 +265,25 @@ export default function SpringPanel({ onClose }: { onClose: () => void }) {
   // 拉取可用模型（enabled 项），默认选 .env 配置的模型
   useEffect(() => {
     let alive = true;
-    invoke<SpringModel[]>("spring_models", { base: SPRING_BASE })
-      .then((ms) => {
-        if (!alive) return;
-        const usable = ms.filter((m) => m.enabled !== false && m.id);
-        setModels(usable);
-        const hasDefault = usable.some((m) => m.id === SPRING_MODEL);
-        if (!hasDefault && usable.length > 0) setModel(usable[0].id);
-      })
-      .catch(() => {
-        /* 拉取失败就只用 .env 默认模型 */
-      });
-    invoke<{ tools?: number; mcp?: number; knowledge?: number; models?: number; uptimeSecs?: number }>("spring_info", { base: SPRING_BASE })
-      .then((v) => alive && setInfo(v))
-      .catch((e) => console.error("[sprite] 操作失败:", e));
+    (async () => {
+      // 从 Keychain 读取 spring 的 API key（若有）作为请求认证头
+      const token = (await getApiKeyFromKeychain("spring")) ?? "";
+      if (!alive) return;
+      invoke<SpringModel[]>("spring_models", { base: SPRING_BASE, token })
+        .then((ms) => {
+          if (!alive) return;
+          const usable = ms.filter((m) => m.enabled !== false && m.id);
+          setModels(usable);
+          const hasDefault = usable.some((m) => m.id === SPRING_MODEL);
+          if (!hasDefault && usable.length > 0) setModel(usable[0].id);
+        })
+        .catch(() => {
+          /* 拉取失败就只用 .env 默认模型 */
+        });
+      invoke<{ tools?: number; mcp?: number; knowledge?: number; models?: number; uptimeSecs?: number }>("spring_info", { base: SPRING_BASE, token })
+        .then((v) => alive && setInfo(v))
+        .catch((e) => console.error("[sprite] 操作失败:", e));
+    })();
     return () => {
       alive = false;
     };
