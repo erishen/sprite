@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { verifyPassword } from "../utils/crypto";
 import "./LockScreen.css";
 
 interface LockScreenProps {
@@ -10,11 +11,13 @@ interface LockScreenProps {
 /**
  * 锁屏组件：显示锁屏界面，要求输入密码才能解锁。
  * 锁屏时隐藏所有敏感内容，保护用户隐私。
+ * 密码以 PBKDF2 哈希形式持久化，校验时对输入做同样的哈希后比对。
  */
 export default function LockScreen({ password, appTitle, onUnlock }: LockScreenProps) {
   const [inputPassword, setInputPassword] = useState("");
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
+  const [checking, setChecking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // 自动聚焦密码输入框
@@ -22,8 +25,12 @@ export default function LockScreen({ password, appTitle, onUnlock }: LockScreenP
     inputRef.current?.focus();
   }, []);
 
-  const handleUnlock = () => {
-    if (inputPassword === password) {
+  const handleUnlock = async () => {
+    if (!password || checking) return;
+    setChecking(true);
+    const ok = await verifyPassword(inputPassword, password);
+    setChecking(false);
+    if (ok) {
       setError("");
       onUnlock();
     } else {
@@ -53,6 +60,7 @@ export default function LockScreen({ password, appTitle, onUnlock }: LockScreenP
             className="lock-input"
             placeholder="输入密码"
             value={inputPassword}
+            disabled={checking}
             onChange={(e) => {
               setInputPassword(e.target.value);
               setError("");
@@ -61,8 +69,8 @@ export default function LockScreen({ password, appTitle, onUnlock }: LockScreenP
           />
         </div>
         {error && <p className="lock-error">{error}</p>}
-        <button className="lock-unlock-btn" onClick={handleUnlock}>
-          解锁
+        <button className="lock-unlock-btn" onClick={handleUnlock} disabled={checking}>
+          {checking ? "验证中…" : "解锁"}
         </button>
       </div>
     </div>

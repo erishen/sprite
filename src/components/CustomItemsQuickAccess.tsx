@@ -43,8 +43,8 @@ export function CustomItemsQuickAccess({
   };
 
   // 处理主密码解锁
-  const handleUnlock = () => {
-    if (unlock(passwordInput)) {
+  const handleUnlock = async () => {
+    if (await unlock(passwordInput)) {
       setPasswordInput("");
       setPasswordError("");
       setShowPasswordInput(false);
@@ -78,7 +78,7 @@ export function CustomItemsQuickAccess({
                 setPasswordError("");
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleUnlock();
+                if (e.key === "Enter") void handleUnlock();
                 if (e.key === "Escape") {
                   setShowPasswordInput(false);
                   setPasswordInput("");
@@ -88,7 +88,7 @@ export function CustomItemsQuickAccess({
               className="quick-password-field"
               autoFocus
             />
-            <button className="quick-password-unlock-btn" onClick={handleUnlock}>
+            <button className="quick-password-unlock-btn" onClick={() => void handleUnlock()}>
               解锁
             </button>
             <button

@@ -6,6 +6,7 @@ import {
   saveApiKeyToKeychain,
   isKeychainAvailable,
 } from "../utils/keychain";
+import { hashPassword } from "../utils/crypto";
 
 /** 内置 LLM 配置 */
 export interface BuiltinConfig {
@@ -186,18 +187,35 @@ export function useSettings() {
   const save = useCallback(async (newSettings: Settings) => {
     setSaving(true);
     try {
-      // 如果启用了 Keychain，将 API Key 保存到 Keychain
-      if (newSettings.useKeychain) {
+      // 密码字段持久化前哈希（PBKDF2 + 随机盐），避免明文密码落盘。
+      // 已哈希的旧值（以 pbkdf2$ 开头）保持原样，不做二次哈希。
+      const persistedSettings: Settings = {
+        ...newSettings,
+        lockPassword:
+          newSettings.lockPassword && !newSettings.lockPassword.startsWith("pbkdf2$")
+            ? await hashPassword(newSettings.lockPassword)
+            : newSettings.lockPassword,
+        masterPassword:
+          newSettings.masterPassword && !newSettings.masterPassword.startsWith("pbkdf2$")
+            ? await hashPassword(newSettings.masterPassword)
+            : newSettings.masterPassword,
+      };
+
+      // 如果启用了 Keychain，将 API Key 保存到 Keychain，且 settings.json 中不再重复落盘明文 key
+      if (persistedSettings.useKeychain) {
         try {
           const keychainAvailable = await isKeychainAvailable();
           if (keychainAvailable) {
             // 保存各个 API Key 到 Keychain
-            if (newSettings.builtin.apiKey) {
-              await saveApiKeyToKeychain("builtin", newSettings.builtin.apiKey);
+            if (persistedSettings.builtin.apiKey) {
+              await saveApiKeyToKeychain("builtin", persistedSettings.builtin.apiKey);
             }
-            if (newSettings.harness.apiToken) {
-              await saveApiKeyToKeychain("harness", newSettings.harness.apiToken);
+            if (persistedSettings.harness.apiToken) {
+              await saveApiKeyToKeychain("harness", persistedSettings.harness.apiToken);
             }
+            // Keychain 保存成功后，settings.json 中清空明文 key（加载时从 Keychain 回填）
+            persistedSettings.builtin = { ...persistedSettings.builtin, apiKey: "" };
+            persistedSettings.harness = { ...persistedSettings.harness, apiToken: "" };
             console.log("[sprite] API Key 已保存到 Keychain");
           }
         } catch (keychainError) {
@@ -205,8 +223,19 @@ export function useSettings() {
         }
       }
 
-      await invoke("save_settings", { settings: newSettings });
-      setSettings(newSettings);
+      await invoke("save_settings", { settings: persistedSettings });
+      // 内存态保留完整 key（从 Keychain 回填后展示），磁盘态由 persistedSettings 决定
+      setSettings({
+        ...persistedSettings,
+        builtin: {
+          ...persistedSettings.builtin,
+          apiKey: persistedSettings.builtin.apiKey || newSettings.builtin.apiKey,
+        },
+        harness: {
+          ...persistedSettings.harness,
+          apiToken: persistedSettings.harness.apiToken || newSettings.harness.apiToken,
+        },
+      });
       return true;
     } catch (e) {
       console.error("[sprite] 保存设置失败:", e);

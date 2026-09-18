@@ -67,13 +67,17 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
     setSaveError(null);
     setMasterPasswordError(null);
 
+    // 密码字段以 pbkdf2$ 开头表示已哈希（已有密码），不参与明文校验
+    const isMasterHashed = draft.masterPassword.startsWith("pbkdf2$");
+
     // 验证主密码
     if (draft.masterPasswordEnabled) {
       if (!draft.masterPassword) {
         setMasterPasswordError("请输入主密码");
         return;
       }
-      if (draft.masterPassword !== confirmMasterPassword) {
+      // 仅当用户新输入了明文主密码（非哈希）时，才校验两次输入一致
+      if (!isMasterHashed && draft.masterPassword !== confirmMasterPassword) {
         setMasterPasswordError("两次输入的主密码不一致");
         return;
       }
@@ -339,8 +343,16 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                     <label>锁屏密码</label>
                     <input
                       type="password"
-                      placeholder="请输入锁屏密码"
-                      value={draft.lockPassword}
+                      placeholder={
+                        draft.lockPassword && draft.lockPassword.startsWith("pbkdf2$")
+                          ? "已设置，输入新密码可修改"
+                          : "请输入锁屏密码"
+                      }
+                      value={
+                        draft.lockPassword && draft.lockPassword.startsWith("pbkdf2$")
+                          ? ""
+                          : draft.lockPassword
+                      }
                       onChange={(e) => updateDraft({ lockPassword: e.target.value })}
                     />
                     <p className="settings-hint">设置后，应用锁定时需要输入此密码才能解锁。请牢记密码，忘记后无法找回。</p>
@@ -397,8 +409,16 @@ export default function SettingsPanel({ onClose }: SettingsPanelProps) {
                     <label>主密码</label>
                     <input
                       type="password"
-                      placeholder="请输入主密码"
-                      value={draft.masterPassword}
+                      placeholder={
+                        draft.masterPassword && draft.masterPassword.startsWith("pbkdf2$")
+                          ? "已设置，输入新密码可修改"
+                          : "请输入主密码"
+                      }
+                      value={
+                        draft.masterPassword && draft.masterPassword.startsWith("pbkdf2$")
+                          ? ""
+                          : draft.masterPassword
+                      }
                       onChange={(e) => updateDraft({ masterPassword: e.target.value })}
                     />
                     <p className="settings-hint">设置后，访问密码箱内容需要输入此密码。请牢记主密码，忘记后无法找回已加密的内容。</p>

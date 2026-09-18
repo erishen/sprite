@@ -49,6 +49,11 @@ fn default_true() -> bool {
     true
 }
 
+/// 默认全局热键
+fn default_hotkey() -> String {
+    "Cmd+Option+D".to_string()
+}
+
 /// 完整设置结构
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -59,9 +64,29 @@ pub struct Settings {
     pub pomodoro_enabled: bool,
     #[serde(default = "default_true")]
     pub system_monitor_enabled: bool,
+    #[serde(default = "default_true")]
+    pub clipboard_history_enabled: bool,
+    #[serde(default = "default_hotkey")]
+    pub hotkey: String,
+    #[serde(default)]
+    pub lock_enabled: bool,
+    #[serde(default)]
+    pub lock_password: String,
+    #[serde(default)]
+    pub auto_lock_minutes: u64,
+    #[serde(default)]
+    pub master_password_enabled: bool,
+    #[serde(default)]
+    pub master_password: String,
+    #[serde(default)]
+    pub use_keychain: bool,
+    #[serde(default)]
     pub builtin: BuiltinConfig,
+    #[serde(default)]
     pub resolve: ResolveConfig,
+    #[serde(default)]
     pub spring: SpringConfig,
+    #[serde(default)]
     pub harness: HarnessConfig,
 }
 
@@ -71,11 +96,33 @@ impl Default for Settings {
             app_title: "ESN".to_string(),
             pomodoro_enabled: true,
             system_monitor_enabled: true,
+            clipboard_history_enabled: true,
+            hotkey: "Cmd+Option+D".to_string(),
+            lock_enabled: false,
+            lock_password: String::new(),
+            auto_lock_minutes: 0,
+            master_password_enabled: false,
+            master_password: String::new(),
+            use_keychain: false,
             builtin: BuiltinConfig::default(),
             resolve: ResolveConfig::default(),
             spring: SpringConfig::default(),
             harness: HarnessConfig::default(),
         }
+    }
+}
+
+/// 将文件权限收紧为仅所有者可读写（Unix 0600）。
+/// 不存在的文件、非 Unix 平台或权限设置失败时静默忽略。
+fn tighten_file_permissions(path: &std::path::Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = path;
     }
 }
 
@@ -111,6 +158,8 @@ pub async fn save_settings(app: AppHandle, settings: Settings) -> Result<(), Str
     let json =
         serde_json::to_string_pretty(&settings).map_err(|e| format!("序列化配置失败: {e}"))?;
     fs::write(&path, json).map_err(|e| format!("写入配置文件失败: {e}"))?;
+    // 显式收紧配置文件权限为 0600（仅所有者可读写），不依赖环境默认 umask
+    tighten_file_permissions(&path);
     // 保存成功后发送全局事件，通知所有窗口重新加载设置
     let _ = app.emit("settings-updated", ());
     Ok(())

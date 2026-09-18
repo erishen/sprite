@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { encrypt, decrypt } from "../utils/crypto";
+import { encrypt, decrypt, verifyPassword } from "../utils/crypto";
 
 /** 自定义配置项 */
 export interface CustomItem {
@@ -18,38 +18,42 @@ function genId(): string {
 /**
  * 自定义配置项管理 hook
  * 数据存储在 localStorage，内容加密存储
- * 支持主密码验证：如果启用了主密码，需要验证后才能访问内容
+ * 支持主密码验证：如果启用了主密码（且已设置非空密码），需要验证后才能访问内容
  */
 export function useCustomItems(masterPasswordEnabled?: boolean, masterPassword?: string) {
   const enabled = masterPasswordEnabled ?? false;
   const password = masterPassword ?? "";
   const [items, setItems] = useState<CustomItem[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [unlocked, setUnlocked] = useState(!enabled);
+  // 空密码不锁定：未设置密码时密码箱保持解锁（避免"假锁定"导致永远无法访问）
+  const [unlocked, setUnlocked] = useState(!enabled || !password);
 
   // 主密码状态变化时，更新解锁状态
   useEffect(() => {
-    if (!enabled) {
-      setUnlocked(true);
-    } else {
-      setUnlocked(false);
-    }
-  }, [enabled]);
-
-  // 验证主密码
-  const verifyMasterPassword = useCallback((pwd: string): boolean => {
-    if (!enabled) return true;
-    return pwd === password;
+    setUnlocked(!enabled || !password);
   }, [enabled, password]);
 
+  // 验证主密码（与持久化的 PBKDF2 哈希比对）
+  const verifyMasterPassword = useCallback(
+    async (pwd: string): Promise<boolean> => {
+      if (!enabled) return true;
+      if (!password) return true; // 未设置密码，视为无需验证
+      return verifyPassword(pwd, password);
+    },
+    [enabled, password],
+  );
+
   // 解锁密码箱
-  const unlock = useCallback((pwd: string): boolean => {
-    if (verifyMasterPassword(pwd)) {
-      setUnlocked(true);
-      return true;
-    }
-    return false;
-  }, [verifyMasterPassword]);
+  const unlock = useCallback(
+    async (pwd: string): Promise<boolean> => {
+      if (await verifyMasterPassword(pwd)) {
+        setUnlocked(true);
+        return true;
+      }
+      return false;
+    },
+    [verifyMasterPassword],
+  );
 
   // 锁定密码箱
   const lock = useCallback(() => {

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { encrypt, decrypt, reencryptAll } from "../crypto";
+import { encrypt, decrypt, reencryptAll, hashPassword, verifyPassword } from "../crypto";
 
 // 在测试前清除 localStorage
 beforeEach(() => {
@@ -103,6 +103,37 @@ describe("crypto", () => {
     it("应该处理空字符串输入", async () => {
       const decrypted = await decrypt("");
       expect(decrypted).toBe("");
+    });
+  });
+
+  describe("hashPassword / verifyPassword", () => {
+    it("应该生成 pbkdf2 格式的哈希，且不包含明文", async () => {
+      const plain = "correct-horse-battery-staple";
+      const hashed = await hashPassword(plain);
+      expect(hashed.startsWith("pbkdf2$100000$")).toBe(true);
+      expect(hashed).not.toContain(plain);
+      expect(hashed.split("$")).toHaveLength(4);
+    });
+
+    it("每次哈希应生成不同的盐（结果不同）", async () => {
+      const plain = "same-password";
+      const h1 = await hashPassword(plain);
+      const h2 = await hashPassword(plain);
+      expect(h1).not.toBe(h2);
+    });
+
+    it("正确密码应校验通过，错误密码应失败", async () => {
+      const plain = "my-secret-password";
+      const hashed = await hashPassword(plain);
+      expect(await verifyPassword(plain, hashed)).toBe(true);
+      expect(await verifyPassword("wrong-password", hashed)).toBe(false);
+      expect(await verifyPassword("", hashed)).toBe(false);
+    });
+
+    it("对非法存储格式应返回 false 而不抛异常", async () => {
+      expect(await verifyPassword("x", "")).toBe(false);
+      expect(await verifyPassword("x", "not-a-hash")).toBe(false);
+      expect(await verifyPassword("x", "pbkdf2$100000$bad$hash")).toBe(false);
     });
   });
 

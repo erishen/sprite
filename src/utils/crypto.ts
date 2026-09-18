@@ -134,6 +134,64 @@ export async function decrypt(encryptedJson: string): Promise<string> {
   }
 }
 
+/** 密码哈希格式：pbkdf2$<iterations>$<saltB64>$<hashB64> */
+const PASSWORD_ITERATIONS = 100000;
+
+/**
+ * 哈希密码（PBKDF2-SHA256 + 随机盐）。
+ * 用于锁屏密码 / 密码箱主密码的持久化存储，避免明文落盘。
+ * @returns 可存储的密码哈希字符串
+ */
+export async function hashPassword(plain: string): Promise<string> {
+  const salt = generateSalt();
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(plain),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: PASSWORD_ITERATIONS, hash: "SHA-256" },
+    keyMaterial,
+    256,
+  );
+  const hash = new Uint8Array(bits);
+  return `pbkdf2$${PASSWORD_ITERATIONS}$${bufferToBase64(salt)}$${bufferToBase64(hash)}`;
+}
+
+/** 校验密码是否匹配存储的哈希（恒定时间比较，避免时序侧信道） */
+export async function verifyPassword(input: string, stored: string): Promise<boolean> {
+  try {
+    const parts = stored.split("$");
+    if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
+    const iterations = parseInt(parts[1], 10);
+    const salt = base64ToBuffer(parts[2]);
+    const expected = base64ToBuffer(parts[3]);
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(input),
+      "PBKDF2",
+      false,
+      ["deriveBits"],
+    );
+    const bits = await crypto.subtle.deriveBits(
+      { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+      keyMaterial,
+      256,
+    );
+    const actual = new Uint8Array(bits);
+    if (actual.length !== expected.length) return false;
+    let diff = 0;
+    for (let i = 0; i < actual.length; i++) diff |= actual[i] ^ expected[i];
+    return diff === 0;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 重新加密所有数据（用于密钥迁移或安全升级）
  * 注意：调用方需要提供旧数据列表

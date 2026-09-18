@@ -90,8 +90,8 @@ export function CustomItemsManager({
   };
 
   // 处理主密码解锁
-  const handleUnlock = () => {
-    if (unlock(passwordInput)) {
+  const handleUnlock = async () => {
+    if (await unlock(passwordInput)) {
       setPasswordInput("");
       setPasswordError("");
     } else {
@@ -151,12 +151,12 @@ export function CustomItemsManager({
               setPasswordError("");
             }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleUnlock();
+              if (e.key === "Enter") void handleUnlock();
             }}
             className="master-password-input"
           />
           {passwordError && <p className="master-password-error">{passwordError}</p>}
-          <button className="master-password-unlock-btn" onClick={handleUnlock}>
+          <button className="master-password-unlock-btn" onClick={() => void handleUnlock()}>
             解锁
           </button>
         </div>
