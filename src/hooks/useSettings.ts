@@ -57,7 +57,7 @@ const DEFAULT_SETTINGS: Settings = {
   appTitle: "ESN",
   pomodoroEnabled: true,
   systemMonitorEnabled: true,
-  clipboardHistoryEnabled: true,
+  clipboardHistoryEnabled: false, // 默认关闭：剪贴板内容可能敏感，需用户显式开启
   hotkey: "Cmd+Option+D",
   lockEnabled: false,
   lockPassword: "",

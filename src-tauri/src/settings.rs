@@ -1,8 +1,12 @@
 //! 设置管理：加载/保存用户配置到本地 JSON 文件。
 //! 配置存储在 app_data_dir/settings.json，打包后也能修改，不依赖 .env。
+//! 注意：settings.json 可能含 API key / token，写入必须 0600。
 
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::io::Write;
+#[cfg(unix)]
+use std::os::unix::fs::OpenOptionsExt;
 use std::path::PathBuf;
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -157,10 +161,19 @@ pub async fn save_settings(app: AppHandle, settings: Settings) -> Result<(), Str
     let path = settings_path(&app)?;
     let json =
         serde_json::to_string_pretty(&settings).map_err(|e| format!("序列化配置失败: {e}"))?;
-    fs::write(&path, json).map_err(|e| format!("写入配置文件失败: {e}"))?;
-    // 显式收紧配置文件权限为 0600（仅所有者可读写），不依赖环境默认 umask
-    tighten_file_permissions(&path);
+    write_private(&path, &json).map_err(|e| format!("写入配置文件失败: {e}"))?;
     // 保存成功后发送全局事件，通知所有窗口重新加载设置
     let _ = app.emit("settings-updated", ());
     Ok(())
+}
+
+/// 以 0600 权限写入文件（settings.json 可能含 API key / token）。
+/// 使用 OpenOptions + mode，避免 fs::write 默认 0644 暴露给本机其他用户。
+fn write_private(path: &PathBuf, content: &str) -> std::io::Result<()> {
+    let mut opts = fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    opts.mode(0o600);
+    let mut f = opts.open(path)?;
+    f.write_all(content.as_bytes())
 }

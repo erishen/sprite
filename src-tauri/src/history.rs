@@ -1,4 +1,7 @@
 use std::fs;
+use std::io::Write;
+#[cfg(unix)]
+use std::os::unix::fs::OpenOptionsExt;
 use std::path::PathBuf;
 
 use tauri::{AppHandle, Manager};
@@ -54,8 +57,16 @@ pub async fn save_history(app: AppHandle, label: String, json: String) -> Result
         }
         return Ok(());
     }
-    fs::write(&path, &json).map_err(|e| format!("写入历史文件失败: {e}"))?;
-    #[cfg(unix)]
-    tighten_file_permissions(&path);
+    write_private(&path, &json).map_err(|e| format!("写入历史文件失败: {e}"))?;
     Ok(())
+}
+
+/// 以 0600 权限写入历史文件（对话/思考链可能含敏感内容，勿以 0644 落盘）。
+fn write_private(path: &PathBuf, content: &str) -> std::io::Result<()> {
+    let mut opts = fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(unix)]
+    opts.mode(0o600);
+    let mut f = opts.open(path)?;
+    f.write_all(content.as_bytes())
 }

@@ -115,7 +115,7 @@ export async function clearAllData(confirm: string): Promise<boolean> {
         app_title: "ESN",
         pomodoro_enabled: true,
         system_monitor_enabled: true,
-        clipboard_history_enabled: true,
+        clipboard_history_enabled: false, // 默认关闭（与 useSettings 一致）
         builtin: { base_url: "", api_key: "", model: "" },
         resolve: { base_url: "" },
         spring: { base_url: "", model: "" },

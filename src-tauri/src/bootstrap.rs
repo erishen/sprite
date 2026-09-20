@@ -28,6 +28,42 @@ fn copy_if_missing(src: &Path, dst: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// 将历史目录内所有文件收紧为 0600，目录本身 0700。
+/// settings.json 单独 0600（由 ensure_private 处理）。
+fn harden_permissions(app_data_dir: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+
+    let settings_path = app_data_dir.join("settings.json");
+    if settings_path.exists() {
+        if let Ok(meta) = fs::metadata(&settings_path) {
+            let mut p = meta.permissions();
+            p.set_mode(0o600);
+            let _ = fs::set_permissions(&settings_path, p);
+        }
+    }
+
+    let history_dir = app_data_dir.join("history");
+    if history_dir.is_dir() {
+        if let Ok(meta) = fs::metadata(&history_dir) {
+            let mut p = meta.permissions();
+            p.set_mode(0o700);
+            let _ = fs::set_permissions(&history_dir, p);
+        }
+        if let Ok(entries) = fs::read_dir(&history_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_file() {
+                    if let Ok(meta) = fs::metadata(&path) {
+                        let mut p = meta.permissions();
+                        p.set_mode(0o600);
+                        let _ = fs::set_permissions(&path, p);
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// 将内置资源中的 settings.json 与其余 *.json 导入 app_data_dir（仅缺失时）。
 pub fn seed_user_data(app: &App) {
     let resource_dir = match app.path().resource_dir() {
@@ -83,4 +119,8 @@ pub fn seed_user_data(app: &App) {
             eprintln!("[sprite] 导入 {} 失败: {e}", name);
         }
     }
+
+    // 权限加固：settings.json 可能含 API key，history/*.json 是对话/思考链，
+    // 均收紧为 0600（目录 0700）。写入路径已 0600，此处兜底修复早期 0644 文件。
+    harden_permissions(&app_data_dir);
 }
