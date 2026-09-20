@@ -15,10 +15,6 @@ fn tighten_dir_permissions(path: &std::path::Path) {
 
 /// 将文件权限收紧为仅所有者可读写（Unix 0600）。
 #[cfg(unix)]
-fn tighten_file_permissions(path: &std::path::Path) {
-    use std::os::unix::fs::PermissionsExt;
-    let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
-}
 
 /// 历史文件存储目录：app_data_dir()/history/（目录权限 0700）
 fn history_dir(app: &AppHandle) -> Result<PathBuf, String> {

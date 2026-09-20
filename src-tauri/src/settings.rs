@@ -118,17 +118,6 @@ impl Default for Settings {
 
 /// 将文件权限收紧为仅所有者可读写（Unix 0600）。
 /// 不存在的文件、非 Unix 平台或权限设置失败时静默忽略。
-fn tighten_file_permissions(path: &std::path::Path) {
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = path;
-    }
-}
 
 /// 获取配置文件路径
 pub fn settings_path(app: &AppHandle) -> Result<PathBuf, String> {
