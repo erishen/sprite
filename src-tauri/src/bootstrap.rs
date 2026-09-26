@@ -24,7 +24,8 @@ fn copy_if_missing(src: &Path, dst: &Path) -> Result<(), String> {
         .parent()
         .ok_or_else(|| format!("目标路径缺少父目录: {}", dst.display()))?;
     fs::create_dir_all(parent).map_err(|e| format!("创建目录失败 {}: {e}", parent.display()))?;
-    fs::copy(src, dst).map_err(|e| format!("复制失败 {} -> {}: {e}", src.display(), dst.display()))?;
+    fs::copy(src, dst)
+        .map_err(|e| format!("复制失败 {} -> {}: {e}", src.display(), dst.display()))?;
     Ok(())
 }
 
