@@ -39,3 +39,11 @@ src-tauri/resources/*.json
 *.njsproj
 *.sln
 *.sw?
+
+# Local editor / agent tooling config — keep local-only, never commit
+.vscode/
+.claude/
+.trae/
+.agents/
+.codex/
+.cursor/
